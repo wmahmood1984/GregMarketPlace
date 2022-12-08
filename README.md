@@ -126,4 +126,8 @@ The place holder NFTs are there as demos - but the functions/links need be worki
 tasks to do :
 
 chutput on buy page, especially on buy card
-User managemnet
+
+
+
+set NODE_OPTIONS=--openssl-legacy-provider
+
