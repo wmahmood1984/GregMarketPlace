@@ -1,0 +1,105 @@
+import React from "react";
+import cn from "classnames";
+import Slider from "react-slick";
+import styles from "./HotBid.module.sass";
+import Icon from "../Icon";
+import Card from "../Card";
+
+// data
+import { bids } from "../../mocks/bids";
+import { useSelector } from "react-redux";
+import Card4 from "../Card4";
+
+const SlickArrow = ({ currentSlide, slideCount, children, ...props }) => (
+  <button {...props}>{children}</button>
+);
+
+const Hot = ({ classSection, title }) => {
+  const settings = {
+    infinite: false,
+    speed: 500,
+    slidesToShow: 4,
+    slidesToScroll: 1,
+    nextArrow: (
+      <SlickArrow>
+        <Icon name="arrow-next" size="14" />
+      </SlickArrow>
+    ),
+    prevArrow: (
+      <SlickArrow>
+        <Icon name="arrow-prev" size="14" />
+      </SlickArrow>
+    ),
+    responsive: [
+      {
+        breakpoint: 1179,
+        settings: {
+          slidesToShow: 3,
+        },
+      },
+      {
+        breakpoint: 1023,
+        settings: {
+          slidesToShow: 2,
+        },
+      },
+      {
+        breakpoint: 767,
+        settings: {
+          slidesToShow: 2,
+          infinite: true,
+        },
+      },
+    ],
+  };
+
+  const bids2 = useSelector((state) => {
+    return state.adoptReducer.moralisData;
+  });
+
+  const bidder = useSelector((state) => {
+    return state.adoptReducer.bids;
+  });
+
+const bids3 = [...bids2]
+
+const refindArray = bids3 && bids3.sort((a, b) => a.highestBidder.length - b.highestBidder.length );
+
+const bids = bids3 && refindArray.reverse()
+
+// console.log("refine",bids)
+
+
+
+  const reduxData = useSelector((state) => {
+
+    return state.adoptReducer.data;
+  });
+
+
+const getName = (add)=>{
+//  console.log("addr step 1",add)
+  const tx1 = reduxData && reduxData.filter(item=>item[2]===add)
+//  console.log("step 2 ",tx1[0][0])
+  return  {name:tx1[0][0],email:tx1[0][1],address:tx1[0][2],image:tx1[0][3]}
+}
+
+  return (
+    <div className={cn(classSection, styles.section)}>
+      <div className={cn("container", styles.container)}>
+        <div className={styles.wrapper}>
+          <h3 className={cn("h3", styles.title)}>{title}</h3>
+          <div className={styles.inner}>
+            <Slider className="bid-slider" {...settings}>
+              {bids3 &&  bids.map((x, index) => (
+                <Card4 key={index} className={styles.card} item={x} />
+              ))}
+            </Slider>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Hot;

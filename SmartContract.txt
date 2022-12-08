@@ -1,0 +1,880 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.0;
+
+
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/IERC721.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Context.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/introspection/ERC165.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Address.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Strings.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/IERC721Receiver.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/IERC721Receiver.sol";
+
+contract ReentrancyGuard {
+    // counter to allow mutex lock with only one SSTORE operation
+    uint256 private _guardCounter;
+
+    constructor ()  {
+        // The counter starts at one to prevent changing it from zero to a non-zero
+        // value, which is a more expensive operation.
+        _guardCounter = 1;
+    }
+
+    /**
+     * @dev Prevents a contract from calling itself, directly or indirectly.
+     * Calling a `nonReentrant` function from another `nonReentrant`
+     * function is not supported. It is possible to prevent this from happening
+     * by making the `nonReentrant` function external, and make it call a
+     * `private` function that does the actual work.
+     */
+    modifier nonReentrant() {
+        _guardCounter += 1;
+        uint256 localCounter = _guardCounter;
+        _;
+        require(localCounter == _guardCounter, "ReentrancyGuard: reentrant call");
+    }
+}
+
+
+contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
+    using Address for address;
+    using Strings for uint256;
+
+ 
+    string private _name;
+
+ 
+    string private _symbol;
+
+ 
+    mapping(uint256 => address) private _owners;
+
+ 
+    mapping(address => uint256) private _balances;
+
+ 
+    mapping(uint256 => address) private _tokenApprovals;
+
+ 
+    mapping(address => mapping(address => bool)) private _operatorApprovals;
+
+ 
+    constructor(string memory name_, string memory symbol_) {
+        _name = name_;
+        _symbol = symbol_;
+    }
+
+
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
+        return
+            interfaceId == type(IERC721).interfaceId ||
+            interfaceId == type(IERC721Metadata).interfaceId ||
+            super.supportsInterface(interfaceId);
+    }
+
+    /**
+     * @dev See {IERC721-balanceOf}.
+     */
+    function balanceOf(address owner) public view virtual override returns (uint256) {
+        require(owner != address(0), "ERC721: address zero is not a valid owner");
+        return _balances[owner];
+    }
+
+    /**
+     * @dev See {IERC721-ownerOf}.
+     */
+    function ownerOf(uint256 tokenId) public view virtual override returns (address) {
+        address owner = _ownerOf(tokenId);
+        require(owner != address(0), "ERC721: invalid token ID");
+        return owner;
+    }
+
+    /**
+     * @dev See {IERC721Metadata-name}.
+     */
+    function name() public view virtual override returns (string memory) {
+        return _name;
+    }
+
+    /**
+     * @dev See {IERC721Metadata-symbol}.
+     */
+    function symbol() public view virtual override returns (string memory) {
+        return _symbol;
+    }
+
+    /**
+     * @dev See {IERC721Metadata-tokenURI}.
+     */
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+        _requireMinted(tokenId);
+        NFTStruct memory tx1 = counterStruct[tokenId];
+        string memory baseURI = _baseURI();
+        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tx1.data)) : "";
+    }
+
+    /**
+     * @dev Base URI for computing {tokenURI}. If set, the resulting URI for each
+     * token will be the concatenation of the `baseURI` and the `tokenId`. Empty
+     * by default, can be overridden in child contracts.
+     */
+    function _baseURI() internal view virtual returns (string memory) {
+        return "https://gateway.pinata.cloud/ipfs/";
+    }
+
+    /**
+     * @dev See {IERC721-approve}.
+     */
+    function approve(address to, uint256 tokenId) public virtual override {
+        address owner = ERC721.ownerOf(tokenId);
+        require(to != owner, "ERC721: approval to current owner");
+
+        require(
+            _msgSender() == owner || isApprovedForAll(owner, _msgSender()),
+            "ERC721: approve caller is not token owner or approved for all"
+        );
+
+        _approve(to, tokenId);
+    }
+
+    /**
+     * @dev See {IERC721-getApproved}.
+     */
+    function getApproved(uint256 tokenId) public view virtual override returns (address) {
+        _requireMinted(tokenId);
+
+        return _tokenApprovals[tokenId];
+    }
+
+    /**
+     * @dev See {IERC721-setApprovalForAll}.
+     */
+    function setApprovalForAll(address operator, bool approved) public virtual override {
+        _setApprovalForAll(_msgSender(), operator, approved);
+    }
+
+    /**
+     * @dev See {IERC721-isApprovedForAll}.
+     */
+    function isApprovedForAll(address owner, address operator) public view virtual override returns (bool) {
+        return _operatorApprovals[owner][operator];
+    }
+
+    /**
+     * @dev See {IERC721-transferFrom}.
+     */
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public virtual override {
+        //solhint-disable-next-line max-line-length
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: caller is not token owner or approved");
+
+        _transfer(from, to, tokenId);
+    }
+
+    /**
+     * @dev See {IERC721-safeTransferFrom}.
+     */
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public virtual override {
+        safeTransferFrom(from, to, tokenId, "");
+    }
+
+    /**
+     * @dev See {IERC721-safeTransferFrom}.
+     */
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory data
+    ) public virtual override {
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: caller is not token owner or approved");
+        _safeTransfer(from, to, tokenId, data);
+    }
+
+    /**
+     * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients
+     * are aware of the ERC721 protocol to prevent tokens from being forever locked.
+     *
+     * `data` is additional data, it has no specified format and it is sent in call to `to`.
+     *
+     * This internal function is equivalent to {safeTransferFrom}, and can be used to e.g.
+     * implement alternative mechanisms to perform token transfer, such as signature-based.
+     *
+     * Requirements:
+     *
+     * - `from` cannot be the zero address.
+     * - `to` cannot be the zero address.
+     * - `tokenId` token must exist and be owned by `from`.
+     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.
+     *
+     * Emits a {Transfer} event.
+     */
+    function _safeTransfer(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory data
+    ) internal virtual {
+        _transfer(from, to, tokenId);
+        require(_checkOnERC721Received(from, to, tokenId, data), "ERC721: transfer to non ERC721Receiver implementer");
+    }
+
+    /**
+     * @dev Returns the owner of the `tokenId`. Does NOT revert if token doesn't exist
+     */
+    function _ownerOf(uint256 tokenId) internal view virtual returns (address) {
+        return _owners[tokenId];
+    }
+
+    /**
+     * @dev Returns whether `tokenId` exists.
+     *
+     * Tokens can be managed by their owner or approved accounts via {approve} or {setApprovalForAll}.
+     *
+     * Tokens start existing when they are minted (`_mint`),
+     * and stop existing when they are burned (`_burn`).
+     */
+    function _exists(uint256 tokenId) internal view virtual returns (bool) {
+        return _ownerOf(tokenId) != address(0);
+    }
+
+    /**
+     * @dev Returns whether `spender` is allowed to manage `tokenId`.
+     *
+     * Requirements:
+     *
+     * - `tokenId` must exist.
+     */
+    function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual returns (bool) {
+        address owner = ERC721.ownerOf(tokenId);
+        return (spender == owner || isApprovedForAll(owner, spender) || getApproved(tokenId) == spender);
+    }
+
+    /**
+     * @dev Safely mints `tokenId` and transfers it to `to`.
+     *
+     * Requirements:
+     *
+     * - `tokenId` must not exist.
+     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.
+     *
+     * Emits a {Transfer} event.
+     */
+
+    uint public tokenCounter;
+    function Mint(address to, string memory _data) public {
+        _safeMint(to, tokenCounter, _data);
+        tokenCounter++;
+    }
+
+    /**
+     * @dev Same as {xref-ERC721-_safeMint-address-uint256-}[`_safeMint`], with an additional `data` parameter which is
+     * forwarded in {IERC721Receiver-onERC721Received} to contract recipients.
+     */
+    function _safeMint(
+        address to,
+        uint256 tokenId,
+        string memory data
+    ) internal virtual {
+        _mint(to, tokenId, data);
+        require(
+            _checkOnERC721Received(address(0), to, tokenId, bytes(data)),
+            "ERC721: transfer to non ERC721Receiver implementer"
+        );
+    }
+
+    /**
+     * @dev Mints `tokenId` and transfers it to `to`.
+     *
+     * WARNING: Usage of this method is discouraged, use {_safeMint} whenever possible
+     *
+     * Requirements:
+     *
+     * - `tokenId` must not exist.
+     * - `to` cannot be the zero address.
+     *
+     * Emits a {Transfer} event.
+     */
+
+     struct NFTStruct {
+         uint counter;
+         string data;
+     }
+
+     mapping(address=>NFTStruct[]) public usersTokens;
+     mapping(uint256=>NFTStruct) public counterStruct;
+
+
+    function _mint(address to, uint256 tokenId, string memory data) internal virtual {
+        require(to != address(0), "ERC721: mint to the zero address");
+        require(!_exists(tokenId), "ERC721: token already minted");
+        NFTStruct memory tx1 = NFTStruct(tokenCounter,data);
+        usersTokens[msg.sender].push(tx1);
+        _beforeTokenTransfer(address(0), to, tokenId, 1);
+        counterStruct[tokenCounter] = tx1;
+
+        // Check that tokenId was not minted by `_beforeTokenTransfer` hook
+        require(!_exists(tokenId), "ERC721: token already minted");
+
+        unchecked {
+            // Will not overflow unless all 2**256 token ids are minted to the same owner.
+            // Given that tokens are minted one by one, it is impossible in practice that
+            // this ever happens. Might change if we allow batch minting.
+            // The ERC fails to describe this case.
+            _balances[to] += 1;
+        }
+
+        _owners[tokenId] = to;
+
+        emit Transfer(address(0), to, tokenId);
+
+        _afterTokenTransfer(address(0), to, tokenId, 1);
+    }
+
+
+    function getNFTUserWise(address _user) public view returns(NFTStruct[] memory){
+        return usersTokens[_user];
+    }
+
+    /**
+     * @dev Destroys `tokenId`.
+     * The approval is cleared when the token is burned.
+     * This is an internal function that does not check if the sender is authorized to operate on the token.
+     *
+     * Requirements:
+     *
+     * - `tokenId` must exist.
+     *
+     * Emits a {Transfer} event.
+     */
+    function _burn(uint256 tokenId) internal virtual {
+        address owner = ERC721.ownerOf(tokenId);
+
+        _beforeTokenTransfer(owner, address(0), tokenId, 1);
+
+        // Update ownership in case tokenId was transferred by `_beforeTokenTransfer` hook
+        owner = ERC721.ownerOf(tokenId);
+
+        // Clear approvals
+        delete _tokenApprovals[tokenId];
+
+        unchecked {
+            // Cannot overflow, as that would require more tokens to be burned/transferred
+            // out than the owner initially received through minting and transferring in.
+            _balances[owner] -= 1;
+        }
+        delete _owners[tokenId];
+
+        emit Transfer(owner, address(0), tokenId);
+
+        _afterTokenTransfer(owner, address(0), tokenId, 1);
+    }
+
+    /**
+     * @dev Transfers `tokenId` from `from` to `to`.
+     *  As opposed to {transferFrom}, this imposes no restrictions on msg.sender.
+     *
+     * Requirements:
+     *
+     * - `to` cannot be the zero address.
+     * - `tokenId` token must be owned by `from`.
+     *
+     * Emits a {Transfer} event.
+     */
+    function _transfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual {
+        require(ERC721.ownerOf(tokenId) == from, "ERC721: transfer from incorrect owner");
+        require(to != address(0), "ERC721: transfer to the zero address");
+
+        _beforeTokenTransfer(from, to, tokenId, 1);
+
+        // Check that tokenId was not transferred by `_beforeTokenTransfer` hook
+        require(ERC721.ownerOf(tokenId) == from, "ERC721: transfer from incorrect owner");
+
+        // Clear approvals from the previous owner
+        delete _tokenApprovals[tokenId];
+
+        unchecked {
+            // `_balances[from]` cannot overflow for the same reason as described in `_burn`:
+            // `from`'s balance is the number of token held, which is at least one before the current
+            // transfer.
+            // `_balances[to]` could overflow in the conditions described in `_mint`. That would require
+            // all 2**256 token ids to be minted, which in practice is impossible.
+            _balances[from] -= 1;
+            _balances[to] += 1;
+        }
+        _owners[tokenId] = to;
+
+        emit Transfer(from, to, tokenId);
+
+        _afterTokenTransfer(from, to, tokenId, 1);
+    }
+
+    /**
+     * @dev Approve `to` to operate on `tokenId`
+     *
+     * Emits an {Approval} event.
+     */
+    function _approve(address to, uint256 tokenId) internal virtual {
+        _tokenApprovals[tokenId] = to;
+        emit Approval(ERC721.ownerOf(tokenId), to, tokenId);
+    }
+
+    /**
+     * @dev Approve `operator` to operate on all of `owner` tokens
+     *
+     * Emits an {ApprovalForAll} event.
+     */
+    function _setApprovalForAll(
+        address owner,
+        address operator,
+        bool approved
+    ) internal virtual {
+        require(owner != operator, "ERC721: approve to caller");
+        _operatorApprovals[owner][operator] = approved;
+        emit ApprovalForAll(owner, operator, approved);
+    }
+
+    /**
+     * @dev Reverts if the `tokenId` has not been minted yet.
+     */
+    function _requireMinted(uint256 tokenId) internal view virtual {
+        require(_exists(tokenId), "ERC721: invalid token ID");
+    }
+
+    /**
+     * @dev Internal function to invoke {IERC721Receiver-onERC721Received} on a target address.
+     * The call is not executed if the target address is not a contract.
+     *
+     * @param from address representing the previous owner of the given token ID
+     * @param to target address that will receive the tokens
+     * @param tokenId uint256 ID of the token to be transferred
+     * @param data bytes optional data to send along with the call
+     * @return bool whether the call correctly returned the expected magic value
+     */
+    function _checkOnERC721Received(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory data
+    ) private returns (bool) {
+        if (to.isContract()) {
+            try IERC721Receiver(to).onERC721Received(_msgSender(), from, tokenId, data) returns (bytes4 retval) {
+                return retval == IERC721Receiver.onERC721Received.selector;
+            } catch (bytes memory reason) {
+                if (reason.length == 0) {
+                    revert("ERC721: transfer to non ERC721Receiver implementer");
+                } else {
+                    /// @solidity memory-safe-assembly
+                    assembly {
+                        revert(add(32, reason), mload(reason))
+                    }
+                }
+            }
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * @dev Hook that is called before any token transfer. This includes minting and burning. If {ERC721Consecutive} is
+     * used, the hook may be called as part of a consecutive (batch) mint, as indicated by `batchSize` greater than 1.
+     *
+     * Calling conditions:
+     *
+     * - When `from` and `to` are both non-zero, ``from``'s tokens will be transferred to `to`.
+     * - When `from` is zero, the tokens will be minted for `to`.
+     * - When `to` is zero, ``from``'s tokens will be burned.
+     * - `from` and `to` are never both zero.
+     * - `batchSize` is non-zero.
+     *
+     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
+     */
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256, /* firstTokenId */
+        uint256 batchSize
+    ) internal virtual {
+        if (batchSize > 1) {
+            if (from != address(0)) {
+                _balances[from] -= batchSize;
+            }
+            if (to != address(0)) {
+                _balances[to] += batchSize;
+            }
+        }
+    }
+
+    /**
+     * @dev Hook that is called after any token transfer. This includes minting and burning. If {ERC721Consecutive} is
+     * used, the hook may be called as part of a consecutive (batch) mint, as indicated by `batchSize` greater than 1.
+     *
+     * Calling conditions:
+     *
+     * - When `from` and `to` are both non-zero, ``from``'s tokens were transferred to `to`.
+     * - When `from` is zero, the tokens were minted for `to`.
+     * - When `to` is zero, ``from``'s tokens were burned.
+     * - `from` and `to` are never both zero.
+     * - `batchSize` is non-zero.
+     *
+     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
+     */
+    function _afterTokenTransfer(
+        address from,
+        address to,
+        uint256 firstTokenId,
+        uint256 batchSize
+    ) internal virtual {}
+
+
+}
+
+
+contract marketPlace is IERC721Receiver, ReentrancyGuard{
+    using Address for address;
+   
+    
+    address public admin;
+    mapping(address=>mapping(uint256=>uint256)) public sellBidPrice;
+    mapping(address=>mapping(uint256 => Auction)) public auctions;
+    uint256 public AuctionArrayIndexNumber;
+    mapping(address=>mapping(uint256=>uint256)) public AuctionArrayIndex;
+    uint256 public commissionRate = 5;
+    uint256 public bidfee = 5;
+
+
+
+
+
+
+
+
+    
+    struct Auction {
+
+        // Parameters of the auction. Times are either
+        // absolute unix timestamps (seconds since 1970-01-01)
+        // or time periods in seconds.
+        uint256 tokenId;
+        address tokenAdd;
+        address payable beneficiary;
+        uint auctionEnd;
+
+        // Current state of the auction.
+        address[] highestBidder;
+        uint[] highestBid;
+
+        // Set to true at the end, disallows any change
+        bool open;
+
+        // minimum reserve price in wei
+        uint256 reserve;
+        uint256 index;
+        address soldTo;
+        uint256 soldFor;
+        bool UpForSale;
+
+    }
+
+
+    Auction[] public AuctionArray;
+
+    constructor(){
+        admin = msg.sender;
+    }
+
+    modifier onlyAdmin {
+      require(msg.sender == admin);
+      _;
+     }
+
+
+
+
+    function createAuction(uint256 tokenId, uint _closingTime, uint256 _reservePrice,address _erc721) public {
+        IERC721 TERC721 = IERC721(_erc721);
+        require(TERC721.getApproved(tokenId)==address(this),"marketplace is not authorized");
+        require(sellBidPrice[_erc721][tokenId]==0, "ERC721Matcha: The selected NFT is open for sale, cannot be auctioned");
+        require(!auctions[_erc721][tokenId].open, "ERC721Matcha: The selected NFT already has an auction");
+        require(TERC721.ownerOf(tokenId)==msg.sender, "ERC721Matcha: Only owner can auction this item");
+
+        Auction memory tx1 = Auction(tokenId,_erc721, payable(msg.sender),_closingTime,new address[](0),new uint256[](0),true,_reservePrice,AuctionArrayIndexNumber,address(0),0,false);
+        AuctionArray.push(tx1);
+        AuctionArrayIndex[_erc721][tokenId]=AuctionArrayIndexNumber;
+
+        auctions[_erc721][tokenId].tokenId = tokenId;
+        auctions[_erc721][tokenId].tokenAdd = _erc721;
+        auctions[_erc721][tokenId].beneficiary = payable(msg.sender);
+        auctions[_erc721][tokenId].auctionEnd = _closingTime;
+        auctions[_erc721][tokenId].reserve = _reservePrice;
+        auctions[_erc721][tokenId].index = AuctionArrayIndexNumber;
+        auctions[_erc721][tokenId].open = true;
+        TERC721.safeTransferFrom(msg.sender,address(this), tokenId);
+        AuctionArrayIndexNumber++;
+    }
+
+    function createAuction2(address user,uint256 tokenId, uint _closingTime, uint256 _reservePrice,address _erc721) public {
+        IERC721 TERC721 = IERC721(_erc721);
+        require(TERC721.getApproved(tokenId)==address(this),"marketplace is not authorized");
+        require(sellBidPrice[_erc721][tokenId]==0, "ERC721Matcha: The selected NFT is open for sale, cannot be auctioned");
+        require(!auctions[_erc721][tokenId].open, "ERC721Matcha: The selected NFT already has an auction");
+     //   require(TERC721.ownerOf(tokenId)==user, "ERC721Matcha: Only owner can auction this item");
+
+        Auction memory tx1 = Auction(tokenId,_erc721, payable(user),_closingTime,new address[](0),new uint256[](0),true,_reservePrice,AuctionArrayIndexNumber,address(0),0,false);
+        AuctionArray.push(tx1);
+        AuctionArrayIndex[_erc721][tokenId]=AuctionArrayIndexNumber;
+
+        auctions[_erc721][tokenId].tokenId = tokenId;
+        auctions[_erc721][tokenId].tokenAdd = _erc721;
+        auctions[_erc721][tokenId].beneficiary = payable(user);
+        auctions[_erc721][tokenId].auctionEnd = _closingTime;
+        auctions[_erc721][tokenId].reserve = _reservePrice;
+        auctions[_erc721][tokenId].index = AuctionArrayIndexNumber;
+        auctions[_erc721][tokenId].open = true;
+        TERC721.safeTransferFrom(user,address(this), tokenId);
+        AuctionArrayIndexNumber++;
+    }
+
+
+    function createAuctionBulk(address[] memory _users, 
+             uint256[] memory tokenId, 
+            uint[] memory _closingTime, 
+            uint256[] memory _reservePrice,
+                address[] memory _erc721) public {
+
+ 
+                 for(uint256 i = 0 ; i < _users.length; i++){
+                    createAuction2(_users[i],tokenId[i],_closingTime[i], _reservePrice[i],_erc721[i]);
+                    }   
+
+    }
+
+
+    function createSale(uint256 tokenId, uint256 _reservePrice,address _erc721) public {
+        IERC721 TERC721 = IERC721(_erc721);
+        require(TERC721.getApproved(tokenId)==address(this),"marketplace is not authorized");
+        require(TERC721.ownerOf(tokenId)==msg.sender, "Auctioner must be the owner");
+        require(!auctions[_erc721][tokenId].open, "ERC721Matcha: The selected NFT already has an auction");
+
+
+        Auction memory tx1 = Auction(tokenId,_erc721, payable(msg.sender),block.timestamp,new address[](0),new uint256[](0),false,_reservePrice,AuctionArrayIndexNumber,address(0),0,true);
+        AuctionArray.push(tx1);
+        AuctionArrayIndex[_erc721][tokenId]=AuctionArrayIndexNumber;
+
+        auctions[_erc721][tokenId].tokenId = tokenId;
+        auctions[_erc721][tokenId].tokenAdd = _erc721;
+        auctions[_erc721][tokenId].beneficiary = payable(msg.sender);
+        auctions[_erc721][tokenId].auctionEnd = block.timestamp;
+        auctions[_erc721][tokenId].reserve = _reservePrice;
+        auctions[_erc721][tokenId].index = AuctionArrayIndexNumber;
+        auctions[_erc721][tokenId].UpForSale = true;
+        
+        TERC721.safeTransferFrom(msg.sender,address(this), tokenId);
+        AuctionArrayIndexNumber++;
+    }
+
+    
+    function bid(uint256 tokenId,address _erc721) public payable nonReentrant {
+        ERC721 TERC = ERC721(_erc721);
+        uint256 index = AuctionArrayIndex[_erc721][tokenId];
+        
+        require(!msg.sender.isContract(), "No script kiddies");
+
+        // auction has to be opened
+        require(auctions[_erc721][tokenId].open, "No opened auction found");
+        require(!auctions[_erc721][tokenId].UpForSale, "This NFT is up for Sale");
+
+        // approve was lost
+//        require(TERC.getApproved(tokenId) == address(this), "Cannot complete the auction");
+        require(msg.value>=AuctionArray[index].reserve, "Cannot complete the auction");
+
+        // Revert the call if the bidding
+        // period is over.
+        require(
+            block.timestamp <= auctions[_erc721][tokenId].auctionEnd,
+            "Auction already ended."
+        );
+
+        // If the bid is not higher, send the
+        // money back.
+
+        uint256  lastBid = auctions[_erc721][tokenId].highestBid.length==0 ? 0 : auctions[_erc721][tokenId].highestBid[auctions[_erc721][tokenId].highestBid.length-1];
+        require(
+            msg.value > lastBid,
+            "There already is a higher bid."
+        );
+
+        address owner = TERC.ownerOf(tokenId);
+        require(msg.sender!=owner, "ERC721Matcha: The owner cannot bid his own collectible");
+        auctions[_erc721][tokenId].highestBid.push(msg.value);
+        auctions[_erc721][tokenId].highestBidder.push(msg.sender);
+        AuctionArray[index].highestBid.push(msg.value) ;
+        AuctionArray[index].highestBidder.push(msg.sender);        
+
+
+        // return the funds to the previous bidder, if there is one
+
+
+
+
+    }
+
+
+
+
+    function cancelAuctionAndSale(address _erc721, uint256 tokenId,uint256 _price) public {
+    require(auctions[_erc721][tokenId].open,"This auctions has been ended");
+
+       for(uint256 i = 0 ; i < auctions[_erc721][tokenId].highestBidder.length; i++){
+                payable(auctions[_erc721][tokenId].highestBidder[i]).transfer(auctions[_erc721][tokenId].highestBid[i]);
+            }
+
+        
+        // finalize the auction
+        uint256 index = AuctionArrayIndex[_erc721][tokenId];
+        AuctionArray[index].open=false;
+        auctions[_erc721][tokenId].open=false;
+        AuctionArray[index].reserve=_price;
+        auctions[_erc721][tokenId].reserve=_price;
+        AuctionArray[index].UpForSale=true;
+        auctions[_erc721][tokenId].UpForSale=true;
+
+    }
+
+
+
+
+        // implement the auctionFinalize including the NFT transfer logic
+    function auctionFinalize(uint256 tokenId,address _erc721) public nonReentrant {
+            require(auctions[_erc721][tokenId].open,"This auctions has been ended");
+            require(!auctions[_erc721][tokenId].UpForSale, "This NFT is up for Sale");
+        if (auctions[_erc721][tokenId].highestBid.length-1>0) {
+
+
+            address _highestBidder = auctions[_erc721][tokenId].highestBidder[auctions[_erc721][tokenId].highestBidder.length-1];
+
+
+            uint256 amount4admin = auctions[_erc721][tokenId].highestBid[auctions[_erc721][tokenId].highestBid.length-1] * commissionRate / 100;
+
+            uint256 amount4owner = auctions[_erc721][tokenId].highestBid[auctions[_erc721][tokenId].highestBid.length-1] - amount4admin;
+
+            // to owner
+            payable(auctions[_erc721][tokenId].beneficiary).transfer(amount4owner);
+    
+
+            // to admin
+            payable(admin).transfer(amount4admin);
+
+           ERC721 TERC = ERC721(auctions[_erc721][tokenId].tokenAdd);
+           TERC.safeTransferFrom(address(this),_highestBidder,tokenId);
+
+
+        auctions[_erc721][tokenId].soldFor = amount4admin+amount4owner;
+        auctions[_erc721][tokenId].soldTo = _highestBidder;
+
+        auctions[_erc721][tokenId].highestBid.pop();
+        auctions[_erc721][tokenId].highestBidder.pop();
+
+            for(uint256 i = 0 ; i < auctions[_erc721][tokenId].highestBidder.length; i++){
+                payable(auctions[_erc721][tokenId].highestBidder[i]).transfer(auctions[_erc721][tokenId].highestBid[i]);
+            }
+
+        }
+
+        
+
+        // finalize the auction
+        uint256 index = AuctionArrayIndex[_erc721][tokenId];
+        AuctionArray[index].open=false;
+        auctions[_erc721][tokenId].open=false;
+
+
+
+    }
+
+
+
+    function auctionCancel(uint256 tokenId,address _erc721) public nonReentrant {
+        require(auctions[_erc721][tokenId].open,"This auctions has been ended");
+
+
+           ERC721 TERC = ERC721(auctions[_erc721][tokenId].tokenAdd);
+           TERC.safeTransferFrom(address(this),auctions[_erc721][tokenId].beneficiary,tokenId);
+        for(uint256 i = 0 ; i < auctions[_erc721][tokenId].highestBidder.length; i++){
+                payable(auctions[_erc721][tokenId].highestBidder[i]).transfer(auctions[_erc721][tokenId].highestBid[i]);
+            }
+
+        
+        // finalize the auction
+        uint256 index = AuctionArrayIndex[_erc721][tokenId];
+        AuctionArray[index].open=false;
+        auctions[_erc721][tokenId].open=false;
+
+
+
+    }
+
+    function purchase(uint256 tokenId,address _erc721) public payable{
+        ERC721 Token = ERC721(_erc721);
+        require(auctions[_erc721][tokenId].UpForSale,"This NFT is not for sale");
+        uint256 price = auctions[_erc721][tokenId].reserve;
+
+        uint256 commission = price * commissionRate /100;
+        uint256 ownersShare = price-commission;
+        payable(admin).transfer(commission);
+        payable(auctions[_erc721][tokenId].beneficiary).transfer(ownersShare);
+
+        uint256 index = AuctionArrayIndex[_erc721][tokenId];
+        AuctionArray[index].UpForSale=false;
+        auctions[_erc721][tokenId].UpForSale=false;
+        auctions[_erc721][tokenId].soldFor = price;
+        auctions[_erc721][tokenId].soldTo = msg.sender;
+
+
+        Token.transferFrom(address(this),msg.sender,tokenId);
+    }
+
+
+    function checkAuctionSale(address _erc721, uint256 tokenId) public view returns(bool,bool){
+
+        bool AuctionCheck = auctions[_erc721][tokenId].open;
+        bool SaleCheck = auctions[_erc721][tokenId].UpForSale;
+
+        return(AuctionCheck,SaleCheck);
+    }
+
+
+
+     function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) override external returns(bytes4){
+        return this.onERC721Received.selector;
+    }
+
+    function getArray() public view returns (Auction[] memory){
+        return AuctionArray;
+    }
+
+
+}
+
+
+
+
+
