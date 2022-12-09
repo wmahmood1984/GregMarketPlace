@@ -1,0 +1,34 @@
+Change to TVL instead of BNB
+Change the description spelling
+Change the properties spelling
+change the price to TVL's price. 
+remove unlock once 
+Use instant sale price =>it will take a price and will be available for sale upfront for any person willing to pay that price. 
+make preview button oval 
+
+
+a person comes and wants to 
+	1) mint the NFT and
+	      a) wants to auction it
+	      b ) wants to sell it instantly
+       
+	2) Already have the NFT and
+	      a) wants to auction it
+	      b ) wants to sell it instanly 
+
+Why search01 is crashing again and again
+
+Service fee = fee which marketplace owner will get on all the transactions - done
+add to increase / decrease the service fee by admin only 
+
+Royalty = portion of fee given to the original auctioneer. Whatever number of transacitons are being done on that NFT, the original auctioneer will get 
+
+
+Put the country collections in hot collections 
+
+the person going to mint / auction has to say us what kind of category this nft going to be fall in 
+
+make the continents bigger 
+
+discussion on databases at the end and recommendation on moralis / pinata / aws. 
+

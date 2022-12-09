@@ -299,7 +299,7 @@ setLockLoader(true)
                           name="Auction End"
                           value={AuctionEnd}
                           onChange={(e)=>{setAuctionEnd(e.target.value)}}
-                          type="date"
+                          type="datetime-local"
                           required
                         />
                       </div>
