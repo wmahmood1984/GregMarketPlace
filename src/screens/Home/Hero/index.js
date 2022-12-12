@@ -8,11 +8,12 @@ import Player from "../../../components/Player";
 import Modal from "../../../components/Modal";
 import Connect from "../../../components/Connect";
 import { useDispatch, useSelector } from "react-redux";
-import Timer2 from "./Timer2";
+
 import { useEffect } from "react";
 import { getData } from "../../../state/ui";
 import { useWeb3React } from "@web3-react/core";
 import Bid from "../../../components/Bid";
+import Component from "./Component";
 // import Bid from "../../../components/Bid";
 
 // const items = [
@@ -93,15 +94,15 @@ const Hero = ({ subtitle, title, link }) => {
 
   const data = useSelector((state) => {
     return state.adoptReducer.data;
-  });
+  })  ;
 
   const items2 = useSelector((state) => {
-    return state.adoptReducer.moralisData;
+    return state.adoptReducer.bids;
   });
 
   const items = items2 && items2.filter(item=>item.title!=`Server error`)
 
-
+  console.log("items",items2)
 
 
   return (
@@ -130,57 +131,11 @@ const Hero = ({ subtitle, title, link }) => {
                 <div className={styles.slide} key={index}>
                   <div className={styles.row}>
                     <Player className={styles.player} item={x} />
-                    <div className={styles.details}>
-                      <div className={cn("h1", styles.subtitle)}>{x.title}</div>
-                      <div className={styles.line}>
-                        <div className={styles.item}>
-                          <div className={styles.avatar}>
-                            <img src={x.avatar} alt="Avatar" />
-                          </div>
-                          <div className={styles.description}>
-                            <div className={styles.category}>Creator</div>
-                            <div className={styles.text}>{x.creator}</div>
-                          </div>
-                        </div>
-                        <div className={styles.item}>
-                          <div className={styles.icon}>
-                            <Icon name="stop" size="24" />
-                          </div>
-                          <div className={styles.description}>
-                            <div className={styles.category}>Instant price</div>
-                            <div className={styles.text}>{x.currency}</div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className={styles.wrap}>
-                        <div className={styles.info}>Current Bid</div>
-                        <div className={styles.currency}>{x.currency}</div>
-                        <div className={styles.price}>{x.price}</div>
-                        
-                        <Timer2
-                        start={x.auctionEnd}
-                        styles={styles}
-                        ></Timer2>
-                      </div>
-                      <div className={styles.btns}>
-                        <button
-                          className={cn("button", styles.button)}
-                          onClick={() => {
-                            setTokenId(x.tokenId)
-                            setTokenAdd(x.tokenAdd)
-                            setVisibleModalBid(true)
-                          }}
-                        >
-                          Place a bid
-                        </button>
-                        <Link
-                          className={cn("button-stroke", styles.button)}
-                          to={`/item/${x.index}`}
-                        >
-                          View item
-                        </Link>
-                      </div>
-                    </div>
+                    <Component 
+                    setTokenId={setTokenId}
+                    setTokenAdd={setTokenAdd}
+                    setVisibleModalBid={setVisibleModalBid}
+                    item={x}/>
                   </div>
                 </div>
               )

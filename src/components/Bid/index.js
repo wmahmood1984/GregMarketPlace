@@ -31,11 +31,11 @@ export const getContract = (library, account,add,abi,setVisibleModalBid,toggle,s
 	return contract;
 };
 
-const Bid = ({ className,tokenId,AddressOfToken,setVisibleModalBid,toggle,setToggle }) => {
+const Bid = ({ className,tokenId,AddressOfToken,setVisibleModalBid,toggle,setToggle,bid,setBid,Approval,allowance }) => {
 
 
 
-  const [bid,setBid] = useState()
+
   const [balance,setBalance] = useState()
   const { account,library } = useWeb3React();
   const [serviceFee,setServiceFee] = useState(500000000000)
@@ -99,7 +99,10 @@ const Bid = ({ className,tokenId,AddressOfToken,setVisibleModalBid,toggle,setTog
       
       </div>
       <div className={styles.btns}>
-        <button onClick={placeBid} className={cn("button", styles.button)}>Place a bid</button>  
+        {allowance>=bid?
+        <button onClick={Approval} className={cn("button", styles.button)}>Approve TVL</button>:
+        <button onClick={placeBid} className={cn("button", styles.button)}>Place a bid</button> 
+        }  
         <button onClick={()=>{setVisibleModalBid(false)}} className={cn("button-stroke", styles.button)}>Cancel</button>
       </div>
     </div>

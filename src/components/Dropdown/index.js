@@ -4,12 +4,13 @@ import OutsideClickHandler from "react-outside-click-handler";
 import styles from "./Dropdown.module.sass";
 import Icon from "../Icon";
 
-const Dropdown = ({ className, value, setValue, options }) => {
+const Dropdown = ({ className, value, setValue, options,setInd }) => {
   const [visible, setVisible] = useState(false);
 
-  const handleClick = (value) => {
+  const handleClick = (value,index) => {
     setValue(value);
     setVisible(false);
+    setInd(index)
   };
 
   return (

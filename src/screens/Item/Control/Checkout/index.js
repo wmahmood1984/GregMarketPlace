@@ -23,7 +23,7 @@ import LoaderCircle from "../../../../components/LoaderCircle";
 //   },
 // ];
 
-const Checkout = ({purchase,setVisibleModalPurchase,purchasing,setPurchasing, className,price,balance,commission }) => {
+const Checkout = ({purchase,setVisibleModalPurchase,purchasing,setPurchasing, className,price,balance,commission,Approval,allowance }) => {
 
   console.log("price",commission)
 
@@ -96,11 +96,19 @@ const Checkout = ({purchase,setVisibleModalPurchase,purchasing,setPurchasing, cl
         </div>
       </div> */}
       <div className={styles.btns}>
-        <button 
-        onClick={purchase}
-        className={cn("button", styles.button)}>
-          I understand, continue
-        </button>
+        {allowance>(price+(price*commission/100))?
+      <button 
+      onClick={purchase}
+      className={cn("button", styles.button)}>
+        I understand, continue
+      </button>: 
+      <button 
+      onClick={Approval}
+      className={cn("button", styles.button)}>
+        Approval TVL
+      </button>  
+      }
+        
         <button 
         onClick={()=>{setVisibleModalPurchase(false)}}
         className={cn("button-stroke", styles.button)}>Cancel</button>

@@ -58,7 +58,7 @@ const FolowSteps2 = ({ className ,upLoadNFT,approval,approvalLoader,mintingDone,
           </button>
         </div>: null
     }
-      
+        
        {approvalLoader?  <div className={styles.item}>
           <div className={styles.head}>
             <div className={styles.icon}>

@@ -9,10 +9,12 @@ import Dropdown from "../../../components/Dropdown";
 
 // data
 // import { bids } from "../../../mocks/bids";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Card4 from "../../../components/Card4";
+import { filterBids, filterByPrice, sortBids, sortBidsAsc, sortBidsDes, sortByPrice } from "../../../state/ui";
+import { formatEther, formatUnits } from "ethers/lib/utils";
 
-const navLinks = ["All items", "Art", "Game", "Photography", "Music", "Video"];
+const navLinks = ["All items", "Adventure","Airlines","Art","Cruise","Culture","Ecotourism","Gastronomy","Honeymoon","Hotels","Luxury","Photography","Safaris","Sports","Others"];
 
 const dateOptions = ["Recently added", "Long added"];
 const priceOptions = ["Highest price", "The lowest price"];
@@ -28,18 +30,19 @@ const SlickArrow = ({ currentSlide, slideCount, children, ...props }) => (
 const Discover = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [date, setDate] = useState(dateOptions[0]);
+  const [category, setCategory] = useState(navLinks[0]);
   const [price, setPrice] = useState(priceOptions[0]);
   const [likes, setLikes] = useState(likesOptions[0]);
   const [creator, setCreator] = useState(creatorOptions[0]);
   const [sorting, setSorting] = useState(sortingOptions[0]);
-
-  const [values, setValues] = useState([5]);
+  const dispatch = useDispatch()
+  const [values, setValues] = useState([0.0001]);
 
   const [visible, setVisible] = useState(false);
 
-  const STEP = 0.1;
-  const MIN = 0.01;
-  const MAX = 10;
+  const STEP = 0.0001;
+  const MIN = 0.0001;
+  const MAX = 0.0005;
 
   const settings = {
     infinite: true,
@@ -72,9 +75,47 @@ const Discover = () => {
 
 
   
-  const bids = useSelector((state) => {
-    return state.adoptReducer.moralisData;
+  const bids2 = useSelector((state) => {
+    return state.adoptReducer.sortedBids;
   });
+
+
+
+   const bids = bids2 && bids2.filter(item=>item.title!=`Server error`)  
+  // const bids4 = [...bids3]
+
+bids2 && bids.map(v=>console.log(formatEther(v.reserve)))
+
+  const Sort = (num)=>{
+
+      setDate(num)
+
+      dispatch(sortBidsAsc({}))
+ 
+
+  }
+
+  const Filter = (num)=>{
+    setCategory(num)
+    dispatch(filterBids(navLinks.indexOf(num)))
+  }
+
+  const bids7 = useSelector((state) => {
+    return state.adoptReducer.bids;
+  });
+
+const sortbyPrice = (num)=>{
+  setPrice(num)
+  dispatch(sortByPrice(num))
+}
+
+const filterbyPrice = (num)=>{
+
+  dispatch(filterByPrice(num))
+}
+
+
+
 
 
   const reduxData = useSelector((state) => {
@@ -83,12 +124,18 @@ const Discover = () => {
   });
 
 
+
+
+
+
 const getName = (add)=>{
 //  console.log("addr step 1",add)
   const tx1 = reduxData && reduxData.filter(item=>item[2]===add)
   console.log("step 2 ",tx1[0][0])
 //  return  {name:tx1[0][0],email:tx1[0][1],address:tx1[0][2],image:tx1[0][3]}
 }
+
+console.log("value",values)
 
   return (
     <div className={cn("section", styles.section)}>
@@ -99,11 +146,11 @@ const getName = (add)=>{
             <Dropdown
               className={styles.dropdown}
               value={date}
-              setValue={setDate}
+              setValue={Sort}
               options={dateOptions}
             />
           </div>
-          <div className={styles.nav}>
+          {/* <div className={styles.nav}>
             {navLinks.map((x, index) => (
               <button
                 className={cn(styles.link, {
@@ -115,6 +162,14 @@ const getName = (add)=>{
                 {x}
               </button>
             ))}
+          </div> */}
+          <div className={styles.dropdown}>
+            <Dropdown
+              className={styles.dropdown}
+              value={category}
+              setValue={Filter}
+              options={navLinks}
+            />
           </div>
           <div className={cn("tablet-show", styles.dropdown)}>
             <Dropdown
@@ -142,11 +197,12 @@ const getName = (add)=>{
               <Dropdown
                 className={styles.dropdown}
                 value={price}
-                setValue={setPrice}
+                setValue={sortbyPrice}
+//                setValue={setPrice}
                 options={priceOptions}
               />
             </div>
-            <div className={styles.cell}>
+            {/* <div className={styles.cell}>
               <div className={styles.label}>likes</div>
               <Dropdown
                 className={styles.dropdown}
@@ -154,7 +210,7 @@ const getName = (add)=>{
                 setValue={setLikes}
                 options={likesOptions}
               />
-            </div>
+            </div> */}
             <div className={styles.cell}>
               <div className={styles.label}>creator</div>
               <Dropdown
@@ -171,7 +227,12 @@ const getName = (add)=>{
                 step={STEP}
                 min={MIN}
                 max={MAX}
-                onChange={(values) => setValues(values)}
+                onChange={(values) => 
+                  {setValues(values)
+                   filterbyPrice(values)
+                  
+                  }
+                }
                 renderTrack={({ props, children }) => (
                   <div
                     onMouseDown={props.onMouseDown}
@@ -231,14 +292,14 @@ const getName = (add)=>{
                         backgroundColor: "#141416",
                       }}
                     >
-                      {values[0].toFixed(1)}
+                      {values[0].toFixed(4)}
                     </div>
                   </div>
                 )}
               />
               <div className={styles.scale}>
-                <div className={styles.number}>0.01 ETH</div>
-                <div className={styles.number}>10 ETH</div>
+                <div className={styles.number}>{MIN} ETH</div>
+                <div className={styles.number}>{MAX} ETH</div>
               </div>
             </div>
           </div>
@@ -248,7 +309,7 @@ const getName = (add)=>{
             className={cn("discover-slider", styles.slider)}
             {...settings}
           >
-            {bids.map((x, index) => (
+            {bids && bids.map((x, index) => (
               <Card4 className={styles.card} item={x} key={index} />
             ))}
           </Slider>

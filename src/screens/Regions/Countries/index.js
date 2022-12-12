@@ -3,6 +3,8 @@ import { useLocation, useParams } from 'react-router-dom'
 import Hero from '../../Home/Hero';
 import HotBid from "../../../components/HotBid";
 import Slider from 'react-slick';
+import Hero4 from '../../Home/Hero/Hero4';
+import Hot4 from '../../../components/HotBid/Hot4';
 
 function Country() {
     let location = useLocation();
@@ -18,6 +20,8 @@ function Country() {
         autoplay: true,
         autoplaySpeed: 2000
     };
+
+    console.log("sate",location.state)
 
     return (
         <>
@@ -58,11 +62,11 @@ function Country() {
                     </div>
                 </div>
 
-                <Hero title="Featured" link={false} subtitle={""} />
+                <Hero4 title="Featured" link={false} subtitle={""} meta={0} code={countryData.code} />
 
-                <HotBid classSection="section" title={"Travel Offers"} />
+                <Hot4 classSection="section" title={"Travel Offers"} code={countryData.code}/>
 
-                <HotBid classSection="section" title={"Travel Collectables"} />
+                <Hot4 classSection="section" title={"Travel Collectables"} code={countryData.code}/>
             </div></>
     )
 }

@@ -11,7 +11,7 @@ import Preview from "./Preview";
 import Cards from "./Cards";
 import FolowSteps from "./FolowSteps";
 import { Contract, utils } from "ethers";
-import { MarketAbi, MarketAdd, TokenAbi, TokenAdd } from "../../config";
+import { Cdata, MarketAbi, MarketAdd, TokenAbi, TokenAdd } from "../../config";
 import { useWeb3React } from "@web3-react/core";
 
 
@@ -24,6 +24,7 @@ const auth =
 
 
 const royaltiesOptions = ["10%", "20%", "30%"];
+const categoriesOptions = ["Adventure","Airlines","Art","Cruise","Culture","Ecotourism","Gastronomy","Honeymoon","Hotels","Luxury","Photography","Safaris","Sports","Others"];
 
 const items = [
   {
@@ -43,6 +44,8 @@ const items = [
     color: "#9757D7",
   },
 ];
+const Continents = Cdata.map((v,e)=>v.title)
+
 
 export const getContract = (library, account,add,abi) => {
 	const signer = library?.getSigner(account).connectUnchecked();
@@ -54,9 +57,10 @@ export const getContract = (library, account,add,abi) => {
 
 const Upload = () => {
   const [royalties, setRoyalties] = useState(royaltiesOptions[0]);
+  const [categories, setCategories] = useState(categoriesOptions[0]);
   const [sale, setSale] = useState(true);
   const [price, setPrice] = useState(false);
-  const [locking, setLocking] = useState(false);
+  const [travelOffer, settravelOffer] = useState(false);
   const [image,setimage] = useState()
   const [name,setname] = useState()
   const [description,setdescription] = useState()
@@ -76,8 +80,30 @@ const Upload = () => {
   const [visibleModal, setVisibleModal] = useState(false);
   const [PriceinEth, setPriceEth] = useState(0);
   const [AuctionEnd, setAuctionEnd] = useState(0);
+  const [continent, setcontinent] = useState(Continents[0]);
+  const [continentInd, setcontinentInd] = useState(0);
+  const [subCon, setsubCon] = useState(0);
+  const [subConInd, setsubConInd] = useState(0);
+  const [country, setCountry] = useState();
+  const [countryInd, setCountryInd] = useState(0);
 
   const [visiblePreview, setVisiblePreview] = useState(false);
+
+
+
+
+const subConArray = Cdata[continentInd].subMenu!=null ? Cdata[continentInd].subMenu.map((v,e)=>v.title) : []
+
+const countryArray = Cdata[continentInd].subMenu ? Cdata[continentInd].subMenu[subConInd].subMenu?.map((v,e)=>v.title) : []
+
+
+function indexGenerator(a,b,c){
+  const x = a<10? `0${a}` : a
+  const y = b+1<10? `0${b+1}` : b
+  const z = c+1<10? `0${c+1}` : c
+  console.log("index",x+y+z)
+  return x+y+z
+}
 
 useEffect(()=>{
   const abc = async ()=>{
@@ -90,6 +116,15 @@ useEffect(()=>{
   }
   abc()
 },[account])
+
+useEffect(()=>{
+  if(Cdata[continentInd].subMenu!=null){
+    setsubCon(Cdata[continentInd].subMenu[0].title)
+  }else{
+    setsubCon(Cdata[continentInd].title)
+  }
+
+},[continentInd,subConInd])
 
 
 
@@ -120,14 +155,18 @@ const captureFile = async(e)=>{
 }
 
 
-console.log("counter", Counter )
+
 
 const upLoadNFT = async ()=>{
   setMintingLoader(true)
-  const obj = {image,name,description,PriceinEth,royalties,size,sale,price,locking,album:items[album].title,minter_address:account}
+ 
+  const obj = {image,name,description,PriceinEth,royalties,size,sale,price,travelOffer,album:items[album].title,minter_address:account}
+
   const jsonObj = JSON.stringify(obj)
   const jsonIPFS = await client.add(jsonObj)
-  const tx = await tokenContract.Mint(account,jsonIPFS.path,{gasLimit:3000000})
+  const tx = await tokenContract.Mint(account,jsonIPFS.path,
+
+    {gasLimit:3000000})
   await tx.wait()
 
   if(tx){
@@ -136,6 +175,8 @@ const upLoadNFT = async ()=>{
     setMintingLoader(false)
   }
 }
+
+
 
 const clearAll = ()=>{
   setimage("")
@@ -165,12 +206,22 @@ const approval = async ()=>{
 
 
 
-const Lock = async ()=>{
+const Lock2 = async ()=>{
 setLockLoader(true)
   try {
+    const ind = indexGenerator(continentInd,subConInd,countryInd)
+    console.log("first",ind)
+    const trvOff = travelOffer ? 1 : 0
+    
     const tx = await marketContract.createAuction(
         Counter,Date.parse(AuctionEnd)/1000,utils.parseUnits(PriceinEth.toString(),"ether") ,TokenAdd
-    ,{gasLimit:3000000}
+    ,    [
+      categoriesOptions.indexOf(categories),
+       
+      trvOff
+    ],ind,
+    
+    {gasLimit:3000000}
         )
     await tx.wait()
     
@@ -182,6 +233,46 @@ setLockLoader(true)
     }
   } catch (error) {
     console.log(error)
+  }
+}
+
+
+
+
+const Lock3 = async ()=>{
+  setLockLoader(true)
+    try {
+      const ind = indexGenerator(continentInd,subConInd,countryInd)
+      const trvOff = travelOffer ? 1 : 0
+      const tx = await marketContract.createSale(
+          Counter,utils.parseUnits(PriceinEth.toString(),"ether") ,TokenAdd
+          ,    [
+            categoriesOptions.indexOf(categories),
+           
+            trvOff
+          ],  ind,
+      
+      {gasLimit:3000000}
+          )
+      await tx.wait()
+      
+      if(tx){
+        console.log("tx",tx)
+        setLockdone(true)
+        setLockLoader(false)
+        setVisibleModal(false)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+
+const Lock = async ()=>{
+  if(!price){
+    Lock2()
+  }else{
+    Lock3()
   }
 }
 
@@ -235,26 +326,82 @@ setLockLoader(true)
                     />
                     <TextInput
                       className={styles.field}
-                      label="descriptionription"
-                      name="descriptionription"
+                      label="description"
+                      name="description"
                       type="text"
                       value={description}
                       onChange={(e)=>{setdescription(e.target.value)}}
                       placeholder="e. g. “After purchasing you will able to recived the logo...”"
                       required
                     />
-                    <div className={styles.row}>
-                      <div className={styles.col}>
+                    <div 
+                    style={{display:"flex",flexWrap:"wrap"}}
+                    //className={styles.row}
+                    >
+                      <div style={{marginTop:"5px"}} className={styles.col}>
                         <div className={styles.field}>
                           <div className={styles.label}>Royalties</div>
                           <Dropdown
+                            
                             className={styles.dropdown}
                             value={royalties}
                             setValue={setRoyalties}
                             options={royaltiesOptions}
+                            setInd={()=>{}}
                           />
                         </div>
                       </div>
+                      <div className={styles.col}>
+                        <div className={styles.field}>
+                          <div className={styles.label}>Categories</div>
+                          <Dropdown
+                            className={styles.dropdown}
+                            value={categories}
+                            setValue={setCategories}
+                            options={categoriesOptions}
+                            setInd={()=>{}}
+                          />
+                        </div>
+                      </div>
+                      <div className={styles.col}>
+                        <div className={styles.field}>
+                          <div className={styles.label}>Continents</div>
+                          <Dropdown
+                            className={styles.dropdown}
+                            value={continent}
+                            setValue={setcontinent}
+                            options={Continents}
+                            setInd={setcontinentInd}
+                          />
+                        </div>
+                      </div>
+                      <div className={styles.col}>
+                      <div className={styles.field}>
+                        <div className={styles.label}>Sub-Continent / Countries</div>
+                        <Dropdown
+                          className={styles.dropdown}
+                          value={subCon}
+                          setValue={setsubCon}
+                          options={subConArray}
+                          setInd={setsubConInd}
+                        />
+                        </div>
+                      </div>
+                      {Cdata[continentInd].subMenu && Cdata[continentInd].subMenu[subConInd].subMenu !=undefined ?
+                      <div className={styles.col}>
+                      <div className={styles.field}>
+                        <div className={styles.label}>Countries</div>
+                        <Dropdown
+                          className={styles.dropdown}
+                          value={country}
+                          setValue={setCountry}
+                          options={countryArray}
+                          setInd={setCountryInd}
+                        />
+                        </div>
+                      </div> :  null
+                      }
+                      
                       <div className={styles.col}>
                         <TextInput
                           className={styles.field}
@@ -270,28 +417,28 @@ setLockLoader(true)
                       <div className={styles.col}>
                         <TextInput
                           className={styles.field}
-                          label="Price"
-                          name="Price"
+                          label="TVL Price"
+                          name="TVL Price"
                           value={PriceinEth}
                           onChange={(e)=>{setPriceEth(e.target.value)}}
                           type="number"
-                          placeholder="2 eth"
+                          placeholder="2 TVL"
                           required
                         />
                       </div>
                       <div className={styles.col}>
                         <TextInput
                           className={styles.field}
-                          label="Propertie"
-                          name="Propertie"
+                          label="Properties"
+                          name="Properties"
                           value={Properties}
                           onChange={(e)=>{setProperties(e.target.value)}}
                           type="text"
-                          placeholder="e. g. Propertie"
+                          placeholder="e. g. Properties"
                           required
                         />
                       </div>
-
+                      
                       <div className={styles.col}>
                         <TextInput
                           className={styles.field}
@@ -308,7 +455,7 @@ setLockLoader(true)
                 </div>
               </div>
               <div className={styles.options}>
-                <div className={styles.option}>
+                {/* <div className={styles.option}>
                   <div className={styles.box}>
                     <div className={styles.category}>Put on sale</div>
                     <div className={styles.text}>
@@ -316,7 +463,7 @@ setLockLoader(true)
                     </div>
                   </div>
                   <Switch value={sale} setValue={setSale} />
-                </div>  
+                </div>   */}
                 <div className={styles.option}>
                   <div className={styles.box}>
                     <div className={styles.category}>Instant sale price</div>
@@ -328,23 +475,22 @@ setLockLoader(true)
                 </div>
                 <div className={styles.option}>
                   <div className={styles.box}>
-                    <div className={styles.category}>Unlock once purchased</div>
+                    <div className={styles.category}>Select as Travel Offer</div>
                     <div className={styles.text}>
-                      Content will be unlocked after successful transaction
+                      Select if you want to make this as travel offer
                     </div>
                   </div>
-                  <Switch value={locking} setValue={setLocking} />
+                  <Switch value={travelOffer} setValue={settravelOffer} />
                 </div>
-                <div className={styles.category}>Choose collection</div>
+                {/* <div className={styles.category}>Choose collection</div>
                 <div className={styles.text}>
                   Choose an exiting collection or create a new one
                 </div>
-                <Cards className={styles.cards} items={items} setAlbum={setAlbum}/>
+                <Cards className={styles.cards} items={items} setAlbum={setAlbum}/> */}
               </div>
               <div className={styles.foot}>
                 <button
-                  style={{backgroundColor:"blue",color:"white"}}
-                  // className={cn("button-stroke tablet-show", styles.button)}
+                 className={cn("button", styles.button)}
                   //onClick={Lock}
                   onClick={()=>{setVisiblePreview(true)}}
                   type="button"
@@ -371,7 +517,7 @@ setLockLoader(true)
           <Preview
 
           clearAll={clearAll}
-          obj={{image,name,description,PriceinEth,royalties,size,sale,price,locking,album:items[album].title}}
+          obj={{image,name,description,PriceinEth,royalties,size,sale,price,travelOffer,album:items[album].title}}
           className={cn(styles.preview, { [styles.active]: visiblePreview })}
           onClose={() => setVisiblePreview(false)}
         />: null 

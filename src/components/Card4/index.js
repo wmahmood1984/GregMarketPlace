@@ -6,9 +6,33 @@ import Icon from "../Icon";
 import { toChecksumAddress } from "ethereum-checksum-address";
 import { utils } from "ethers";
 import { useSelector } from "react-redux";
+import { useEffect } from "react";
+import axios from "axios";
+import { formatUnits } from "ethers/lib/utils";
+
+const categoriesOptions = ["Adventure","Airlines","Art","Cruise","Culture","Ecotourism","Gastronomy","Honeymoon","Hotels","Luxury","Photography","Safaris","Sports","Others"];
 
 const Card4 = ({ className, item }) => {
   const [visible, setVisible] = useState(false);
+  const [URI,setURI] = useState()
+
+  useEffect(()=>{
+    const abc = async ()=>{
+      try {
+        const meta = await axios.get(item.uri,{
+          headers: {
+            'accept': 'application/json'
+          }
+        })
+        setURI(meta.data)        
+      } catch (error) {
+        setURI({name:"server error", image:"server errror"})
+      }
+
+    }
+
+    abc()
+  },[item])
 
 
   const reduxData = useSelector((state) => {
@@ -24,12 +48,16 @@ const getName = (add)=>{
   return  {name:tx1[0][0],email:tx1[0][1],address:tx1[0][2],image:tx1[0][3]}
 }
 
-//console.log("item in ",item)
+// //URI && console.log("URI ",URI.name)
+// console.log("category ",formatUnits(item.category,0))
+// console.log("token id ",formatUnits(item.tokenId,0))
 
   return (
     <div className={cn(styles.card, className)}>
       <div className={styles.preview}>
-        <img srcSet={`${item.image2x} 2x`} src={item.image} alt="Card" />
+        <img 
+        //srcSet={`${URI && URI.image2}`} 
+        src={URI && URI.image} alt="Card" />
         <div className={styles.control}>
           <div
             className={cn(
@@ -37,7 +65,7 @@ const getName = (add)=>{
               styles.category
             )}
           >
-            Category text
+            {item.cate && categoriesOptions[formatUnits(item.category,0)]  }
           </div>
           <button
             className={cn(styles.favorite, { [styles.active]: visible })}
@@ -51,11 +79,11 @@ const getName = (add)=>{
           </button>
         </div>
       </div>
-      <Link className={styles.link} to={{pathname: `/item/${item.index}`, state:{item}} }>
+      <Link className={styles.link} to={{pathname: `/item/${0}`, state:{item}} }>
         <div className={styles.body}>
           <div className={styles.line}>
-            <div className={styles.title}>{item.title}</div>
-            <div className={styles.price}>{item.price}</div>
+             <div className={styles.title}>{URI && URI.name}</div>
+           <div className={styles.price}>{item.reserve &&  utils.formatEther(item.reserve) }</div>
           </div>
           <div className={styles.line}>
             <div className={styles.users}>
@@ -78,7 +106,7 @@ const getName = (add)=>{
             dangerouslySetInnerHTML={{ __html: "5" }}
           />
         </div>
-      </Link>
+      </Link> 
     </div>
   );
 };

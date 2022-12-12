@@ -1,15 +1,19 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import LoadingBar from 'react-top-loading-bar';
 import Hero from '../../Home/Hero';
 import HotBid from "../../../components/HotBid";
 import Slider from 'react-slick';
+import Hero3 from '../../Home/Hero/Hero3';
+import Hot2 from '../../../components/HotBid/Hot2';
+import Hot3 from '../../../components/HotBid/Hot3';
 
 function SubRegion() {
     let { subRegion } = useParams();
     const [data, setData] = useState({});
     const [loading, setLoading] = useState(true)
+    const location = useLocation()
 
     const settings = {
         infinite: true,
@@ -36,6 +40,8 @@ function SubRegion() {
     useEffect(() => {
         fetchData();
     }, [subRegion]);
+
+    console.log("me yehan hoon ",location.state)
 
     return (
         <div>
@@ -86,11 +92,11 @@ function SubRegion() {
                         </div>
                     </div>
 
-                    <Hero title="Featured" link={false} subtitle={""} />
+                    <Hero3 title="Featured" link={false} subtitle={""} code={location.state}/>
 
-                    <HotBid classSection="section" title={"Travel Offers"} />
+                    <Hot3 classSection="section" title={"Travel Offers"} code={location.state}/>
 
-                    <HotBid classSection="section" title={"Travel Collectables"} />
+                    <Hot3 classSection="section" title={"Travel Collectables"} code={location.state}/>
                 </div>)
             }
         </div>

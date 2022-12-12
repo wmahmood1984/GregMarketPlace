@@ -51,32 +51,32 @@ import { setBids } from "../../../state/ui";
 //   },
 // ];
 
-// const users = [
-//   {
-//     name: "Payton Harris",
-//     price: "<span>2.456</span> ETH",
-//     counter: "6",
-//     avatar: "/images/content/avatar-1.jpg",
-//   },
-//   {
-//     name: "Anita Bins",
-//     price: "<span>2.456</span> ETH",
-//     counter: "2",
-//     avatar: "/images/content/avatar-2.jpg",
-//   },
-//   {
-//     name: "Joana Wuckert",
-//     price: "<span>2.456</span> ETH",
-//     counter: "3",
-//     avatar: "/images/content/avatar-3.jpg",
-//   },
-//   {
-//     name: "Lorena Ledner",
-//     price: "<span>2.456</span> ETH",
-//     counter: "4",
-//     avatar: "/images/content/avatar-4.jpg",
-//   },
-// ];
+const users = [
+  {
+    name: "Payton Harris",
+    price: "<span>2.456</span> ETH",
+    counter: "6",
+    avatar: "/images/content/avatar-1.jpg",
+  },
+  {
+    name: "Anita Bins",
+    price: "<span>2.456</span> ETH",
+    counter: "2",
+    avatar: "/images/content/avatar-2.jpg",
+  },
+  {
+    name: "Joana Wuckert",
+    price: "<span>2.456</span> ETH",
+    counter: "3",
+    avatar: "/images/content/avatar-3.jpg",
+  },
+  {
+    name: "Lorena Ledner",
+    price: "<span>2.456</span> ETH",
+    counter: "4",
+    avatar: "/images/content/avatar-4.jpg",
+  },
+];
 
 
 
@@ -96,9 +96,7 @@ const Selection = () => {
     return state.adoptReducer.data;
   });
 
-
-
-//console.log("items",users)
+// console.log("items",items)
   return (
     <div className={cn("section-pb", styles.section)}>
       <div className={cn("container", styles.container)}>
@@ -176,23 +174,23 @@ const Selection = () => {
               🔥
             </span>
           </div>
-          <div className={styles.list}>
-            {users &&  users.map((x, index) => (
+          {/* <div className={styles.list}>
+            {users.map((x, index) => (
               <div className={styles.user} key={index}>
                 <div className={styles.avatar}>
-                  <img src={x[3]} alt="Avatar" />
-                  <div className={styles.number}>{index}</div>
+                  <img src={x.avatar} alt="Avatar" />
+                  <div className={styles.number}>{x.counter}</div>
                 </div>
                 <div className={styles.description}>
-                  <div className={styles.name}>{x[0]}</div>
+                  <div className={styles.name}>{x.name}</div>
                   <div
                     className={styles.money}
-                    dangerouslySetInnerHTML={{ __html: "4BNB"  }}
+                    dangerouslySetInnerHTML={{ __html: x.price }}
                   />
                 </div>
               </div>
             ))}
-          </div>
+          </div> */}
           <Link
             className={cn("button-stroke button-small", styles.button)}
             to="/search01"

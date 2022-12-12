@@ -42,7 +42,11 @@ const Control = ({
   visibleModalViewAll, setVisibleModalViewAll,
   visibleModalAccept, setVisibleModalAccept,
   visibleModalSale, setVisibleModalSale,
-  open,highestBidderAV 
+  open,highestBidderAV,
+  bid,
+  setBid,
+  Approval,
+  allowance, 
 }) => {
   
 
@@ -165,6 +169,8 @@ console.log("bidder",highestBidder)
         setPurchasing={setPurchasing}
         setVisibleModalPurchase={setVisibleModalPurchase}
         purchase={purchase}
+        Approval={Approval}
+        allowance={allowance}
         />
         <SuccessfullyPurchased />
       </Modal>
@@ -182,6 +188,10 @@ console.log("bidder",highestBidder)
         setVisibleModalBid={setVisibleModalBid}
         toggle={toggle}
         setToggle={setToggle}
+        bid={bid}
+        setBid={setBid}
+        Approval={Approval}
+        allowance={allowance}
         />
       </Modal>
       <Modal

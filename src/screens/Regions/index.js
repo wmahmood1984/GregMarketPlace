@@ -1,15 +1,18 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import LoadingBar from 'react-top-loading-bar';
 import Hero from '../Home/Hero';
 import HotBid from "../../components/HotBid";
 import Slider from 'react-slick';
+import Hero2 from '../Home/Hero/Hero2';
+import Hot2 from '../../components/HotBid/Hot2';
 
 function Region() {
     let { region } = useParams();
     const [data, setData] = useState({});
     const [loading, setLoading] = useState(true)
+    const location = useLocation()
 
     const settings = {
         infinite: true,
@@ -36,6 +39,8 @@ function Region() {
     useEffect(() => {
         fetchData();
     }, [region]);
+
+    console.log("location",location.state)
 
     return (
         <>
@@ -92,11 +97,11 @@ function Region() {
 
 
 
-                    <Hero title="Featured" link={false} subtitle={""} />
+                    <Hero2 title="Featured" link={false} subtitle={""} code={location.state}/>
 
-                    <HotBid classSection="section" title={"Travel Offers"} />
+                    <Hot2 classSection="section" title={"Travel Offers"} code={location.state}/>
 
-                    <HotBid classSection="section" title={"Travel Collectables"} />
+                    <Hot2 classSection="section" title={"Travel Collectables"} code={location.state}/>
                 </div>)
             }
         </>

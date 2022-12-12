@@ -1,6 +1,7 @@
-import { client, MarketAbi, MarketAdd, q } from "../../config.js";
-import {Contract, providers, utils} from "ethers"
+import { client, MarketAbi, MarketAdd, network, networkhex, q } from "../../config.js";
+import {Contract, ethers, providers, utils} from "ethers"
 import axios from "axios";
+import { formatEther, formatUnits } from "ethers/lib/utils.js";
 const { toChecksumAddress } = require('ethereum-checksum-address')
 const { createSlice, createAsyncThunk } = require("@reduxjs/toolkit");
 
@@ -22,7 +23,7 @@ export const dataBase = createAsyncThunk(
         ))        
         
    
-
+          
       return { data:tx1.data };
     } catch (error) {
       console.log("Error in ArrayThunk", error);
@@ -35,43 +36,72 @@ export const dataBase = createAsyncThunk(
 export const getData = createAsyncThunk(
   "getData",
   async (a, thunkApi) => {
+    console.log("get Data ran",window.ethereum.networkVersion===network,window.ethereum.networkVersion,network)
     try {
-
-      const tx1 = await marketContract.getArray()
-
-      const tx2 = await client.query(
-    
-        q.Paginate(
-        q.Match(q.Index('Address3'))
-        )) 
+      if(window.ethereum.networkVersion===network){
+        const tx1 = await marketContract.getArray()
+        console.log("network found")
+        const tx2 = await client.query(
       
+          q.Paginate(
+          q.Match(q.Index('Address3'))
+          )) 
+        
+  
+        const functionX = async (v,e)=>{
+          setTimeout(() => {
+            thunkApi.dispatch(
+              getMoralis({
+                
+                item: v,
+                data:tx2.data
+              })
+            );
+            
+  
+          }, e*1200);
+        }
+  
+  
+        tx1 && tx1.map((v,e)=>{
+          functionX(v,e)
+        })
+        return {tx1}
+  
 
-      const functionX = async (v,e)=>{
-        setTimeout(() => {
-          thunkApi.dispatch(
-            getMoralis({
-              
-              item: v,
-              data:tx2.data
-            })
-          );
-          
+      }else {
 
-        }, e*1200);
+        try {
+          window.ethereum.request({
+           method: 'wallet_switchEthereumChain',
+           params: [{ chainId: networkhex }]
+         });
+       } catch (err) {
+        console.log(err)
+ //          This error code indicates that the chain has not been added to MetaMask
+         if (err.code === 4902) {
+           window.ethereum.request({
+             method: 'wallet_addEthereumChain',
+             params: [
+               {
+                 chainName: 'BSC Mainnet',
+                 chainId: networkhex,
+                 nativeCurrency: { name: 'TBNB', decimals: 18, symbol: 'BNB' },
+                 rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545']
+               }
+             ]
+           });
+           window.alert("This chain is not configured in your metamask"
+           // ,{
+           //   type: "failure",
+           //   position: toast.POSITION.BOTTOM_CENTER,
+           //   closeOnClick: true,
+           //   }
+             )
+         }
+       }
+        return {tx1:null}
       }
-
-
-      tx1 && tx1.map((v,e)=>{
-        functionX(v,e)
-      })
-
-
-
-
-
-
-
-      return {tx1}
 
 
     } catch (error) {
@@ -176,6 +206,7 @@ const adoptSlice = createSlice({
     ethBalance: null,
     data:null,
     bids:null,
+    sortedBids:[],
     moralisData:[
       // {
       //   title: "the creator network®",
@@ -203,6 +234,41 @@ const adoptSlice = createSlice({
 
       state.bids = actions.payload._auctions;
     },
+    sortBidsAsc: (state,actions) =>{
+      
+      state.sortedBids = state.sortedBids.reverse()
+           
+       ;
+    },
+    filterBids: (state,actions) =>{
+      console.log("sort bids called",actions.payload)
+      if(actions.payload===0){
+        state.sortedBids = state.bids
+      } else {
+        state.sortedBids = state.bids.filter(item=> Number(formatUnits(item.category,0))===actions.payload-1);
+      }
+
+    },
+
+    sortByPrice: (state,actions) =>{
+
+      const asc = state.bids.sort((a,b)=>(Number(formatEther(a.reserve)) - Number(formatEther(b.reserve))) )
+      
+
+      if(actions.payload==="Highest price"){
+        state.sortedBids = asc.reverse()
+      }else{
+        state.sortedBids = asc
+      }
+
+
+    },
+    filterByPrice: (state,actions) =>{
+      console.log("sort bids called",actions.payload)
+      state.sortedBids = state.bids.filter(item=> Number(formatEther(item.reserve))<=Number(actions.payload[0]));
+
+
+    }
   },
   extraReducers: {
     [dataBase.pending]: (state, action) => {
@@ -233,6 +299,7 @@ const adoptSlice = createSlice({
       state.toggle = !state.toggle;
    //   console.log("tx1",action.payload)
       state.bids = action.payload.tx1;
+      state.sortedBids = action.payload.tx1;
     },
 
 
@@ -244,6 +311,7 @@ const adoptSlice = createSlice({
       state.toggle = !state.toggle;
 
       state.moralisData.push(action.payload);
+
       state.highestBid.push(action.payload.highestBid);
       state.highestBidder.push(action.payload.highestBidder);
     },
@@ -256,4 +324,4 @@ const adoptSlice = createSlice({
 });
 
 export const adopreducer = adoptSlice.reducer;
-export const { toggle, setTest,setBids } = adoptSlice.actions;
+export const { toggle, setTest,setBids,sortBidsAsc,filterBids,sortByPrice,filterByPrice } = adoptSlice.actions;

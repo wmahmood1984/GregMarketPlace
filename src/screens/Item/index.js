@@ -6,10 +6,10 @@ import Control from "./Control";
 import Options from "./Options";
 import {useLocation, useParams} from 'react-router-dom';
 import { useWeb3React } from "@web3-react/core";
-import { MarketAbi, MarketAdd } from "../../config";
+import { ERC20, IERC20, MarketAbi, MarketAdd } from "../../config";
 import { Contract, providers, utils } from "ethers";
 import axios from "axios";
-import { formatUnits } from "ethers/lib/utils";
+import { formatEther, formatUnits } from "ethers/lib/utils";
 import { useSelector } from "react-redux";
 import { client, q } from "../../config.js";
 const navLinks = ["Info", "Owners", "History", "Bids"];
@@ -66,10 +66,12 @@ const Item = () => {
   const [visibleModalPurchase, setVisibleModalPurchase] = useState(false);
   const [visibleModalBid, setVisibleModalBid] = useState(false);
   const [visibleModalViewAll, setVisibleModalViewAll] = useState(false);
+  const [allowance, setAllowance] = useState();
   const [visibleModalAccept, setVisibleModalAccept] = useState(false);
   const [visibleModalSale, setVisibleModalSale] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
-
+  const TVLContract = getContract(library,account, ERC20,IERC20)
+  const [bid,setBid] = useState()
   const {index} = useParams()
 
 
@@ -79,6 +81,7 @@ const Item = () => {
         const item = await marketContractR.getArray()
         console.log("original item",item)
         setAuctions(item[index])
+        setBid(formatEther(item[index].reserve))
         
         const _data = await axios.get(
           `https://deep-index.moralis.io/api/v2/nft/${item[index].tokenAdd}/${item[index].tokenId}?chain=bsc%20testnet&format=decimal&normalizeMetadata=true`,
@@ -87,11 +90,15 @@ const Item = () => {
           )
           setData(_data.data)
 
+
           // const _com = await marketContract.bidfee()
           // setCommission(_com)
       if(account){
           const _balance = await library.getSigner(account).getBalance()
           setBalance(utils.formatEther(_balance))
+
+          const _allowance = await TVLContract.allowance(account,MarketAdd)
+          setAllowance(utils.formatEther(_allowance))
       
       }
 
@@ -225,6 +232,22 @@ const getName = (add)=>{
     }
   }
 
+  const Approval = async ()=>{
+    try {
+      const tx1 = await TVLContract.approve(MarketAdd,utils.formatEther(bid),{gasLimit:3000000})
+      await tx1.wait()
+
+      if(tx1){
+        setToggle(!toggle)
+      }
+      
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  
+
 
   return (
     <>
@@ -338,13 +361,17 @@ const getName = (add)=>{
              visibleModalBid={visibleModalBid} 
              setVisibleModalBid={setVisibleModalBid}
              visibleModalViewAll={visibleModalViewAll}
-            setVisibleModalViewAll={setVisibleModalViewAll}
+             setVisibleModalViewAll={setVisibleModalViewAll}
 
              visibleModalAccept={visibleModalAccept} 
              setVisibleModalAccept={setVisibleModalAccept}
 
              visibleModalSale={visibleModalSale} 
              setVisibleModalSale={setVisibleModalSale}
+             bid={bid}
+             setBid={setBid}
+             Approval={Approval}
+             allowance={allowance}
              />:null
             }  
             

@@ -53,21 +53,23 @@ const Hot = ({ classSection, title }) => {
     ],
   };
 
-  const bids2 = useSelector((state) => {
-    return state.adoptReducer.moralisData;
-  });
+  // const bids2 = useSelector((state) => {
+  //   return state.adoptReducer.moralisData;
+  // });
 
-  const bidder = useSelector((state) => {
+  const bids2 = useSelector((state) => {
     return state.adoptReducer.bids;
   });
 
-const bids3 = [...bids2]
+const bids3 = bids2 && bids2.filter(item=>item.title!=`Server error`)  
 
-const refindArray = bids3 && bids3.sort((a, b) => a.highestBidder.length - b.highestBidder.length );
+const bids4 = bids2 &&  [...bids3]
+
+const refindArray = bids2 && bids4.sort((a, b) => a.highestBidder.length - b.highestBidder.length );
 
 const bids = bids3 && refindArray.reverse()
 
-// console.log("refine",bids)
+ console.log("refine in hot",bids)
 
 
 
@@ -91,7 +93,7 @@ const getName = (add)=>{
           <h3 className={cn("h3", styles.title)}>{title}</h3>
           <div className={styles.inner}>
             <Slider className="bid-slider" {...settings}>
-              {bids3 &&  bids.map((x, index) => (
+              {bids &&  bids.map((x, index) => (
                 <Card4 key={index} className={styles.card} item={x} />
               ))}
             </Slider>

@@ -5,17 +5,17 @@ import { Range, getTrackBackground } from "react-range";
 import Icon from "../../components/Icon";
 import Card from "../../components/Card";
 import Dropdown from "../../components/Dropdown";
-
+import { filterBids, filterByPrice, sortBids, sortBidsAsc, sortBidsDes, sortByPrice } from "../../state/ui";
 // data
 //import { bids } from "../../mocks/bids";
 import { Contract } from "ethers";
 import { MarketAbi, MarketAdd } from "../../config";
 import { useWeb3React } from "@web3-react/core";
 import Card2 from "../../components/Card2";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Card4 from "../../components/Card4";
 
-const navLinks = ["All items", "Art", "Game", "Photography", "Music", "Video"];
+const navLinks = ["All items", "Adventure","Airlines","Art","Cruise","Culture","Ecotourism","Gastronomy","Honeymoon","Hotels","Luxury","Photography","Safaris","Sports","Others"];
 
 const dateOptions = ["Newest", "Oldest"];
 const likesOptions = ["Most liked", "Least liked"];
@@ -33,6 +33,7 @@ export const getContract = (library, account,add,abi) => {
 
 const Search = () => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [category, setCategory] = useState(navLinks[0]);
   const [date, setDate] = useState(dateOptions[0]);
   const [likes, setLikes] = useState(likesOptions[0]);
   const [color, setColor] = useState(colorOptions[0]);
@@ -40,8 +41,8 @@ const Search = () => {
   const { account,library,chainId } = useWeb3React();
   const [search, setSearch] = useState("");
  // const [bids, setAuctions] = useState("");
-  const [values, setValues] = useState([5]);
-
+  const [values, setValues] = useState([0.0001]);
+  const dispatch = useDispatch()
   const marketContract = getContract(library, account,MarketAdd,MarketAbi);
 
   // useEffect(()=>{
@@ -57,21 +58,61 @@ const Search = () => {
   // },[account])
 
 
-  const bids = useSelector((state) => {
-    return state.adoptReducer.moralisData;
+  const bids2 = useSelector((state) => {
+    return state.adoptReducer.sortedBids;
   });
 
 
-  const reduxData = useSelector((state) => {
 
-    return state.adoptReducer.data;
-  });
+   const bids = bids2 && bids2.filter(item=>item.title!=`Server error`) 
+
+
+   const Sort = (num)=>{
+
+    setDate(num)
+
+    dispatch(sortBidsAsc({}))
+
+
+}
+
+const Filter = (num)=>{
+  setCategory(num)
+  dispatch(filterBids(navLinks.indexOf(num)))
+}
+
+const bids7 = useSelector((state) => {
+  return state.adoptReducer.bids;
+});
+
+// const sortbyPrice = (num)=>{
+// setPrice(num)
+// dispatch(sortByPrice(num))
+// }
+
+const filterbyPrice = (num)=>{
+
+dispatch(filterByPrice(num))
+}
+
+
+
+
+
+const reduxData = useSelector((state) => {
+
+  return state.adoptReducer.data;
+});
+
+
+
+
 
 
 const getName = (add)=>{
 //  console.log("addr step 1",add)
-  const tx1 = reduxData && reduxData.filter(item=>item[2]===add)
-  console.log("step 2 ",tx1[0][0])
+const tx1 = reduxData && reduxData.filter(item=>item[2]===add)
+console.log("step 2 ",tx1[0][0])
 //  return  {name:tx1[0][0],email:tx1[0][1],address:tx1[0][2],image:tx1[0][3]}
 }
 
@@ -84,9 +125,9 @@ console.log("array",bids)
     alert();
   };
 
-  const STEP = 0.1;
-  const MIN = 0.01;
-  const MAX = 10;
+  const STEP = 0.0001;
+  const MIN = 0.0001;
+  const MAX = 0.0005;
 
   return (
     <div className={cn("section-pt80", styles.section)}>
@@ -117,11 +158,11 @@ console.log("array",bids)
             <Dropdown
               className={styles.dropdown}
               value={date}
-              setValue={setDate}
+              setValue={Sort}
               options={dateOptions}
             />
           </div>
-          <div className={styles.nav}>
+          {/* <div className={styles.nav}>
             {navLinks.map((x, index) => (
               <button
                 className={cn(styles.link, {
@@ -133,6 +174,14 @@ console.log("array",bids)
                 {x}
               </button>
             ))}
+          </div> */}
+            <div className={styles.dropdown}>
+            <Dropdown
+              className={styles.dropdown}
+              value={category}
+              setValue={Filter}
+              options={navLinks}
+            />
           </div>
         </div>
         <div className={styles.row}>
@@ -144,7 +193,12 @@ console.log("array",bids)
                 step={STEP}
                 min={MIN}
                 max={MAX}
-                onChange={(values) => setValues(values)}
+                onChange={(values) => 
+                  {setValues(values)
+                   filterbyPrice(values)
+                  
+                  }
+                }
                 renderTrack={({ props, children }) => (
                   <div
                     onMouseDown={props.onMouseDown}
@@ -204,14 +258,14 @@ console.log("array",bids)
                         backgroundColor: "#141416",
                       }}
                     >
-                      {values[0].toFixed(1)}
+                      {values[0].toFixed(4)}
                     </div>
                   </div>
                 )}
               />
               <div className={styles.scale}>
-                <div className={styles.number}>0.01 ETH</div>
-                <div className={styles.number}>10 ETH</div>
+              <div className={styles.number}>{MIN} ETH</div>
+                <div className={styles.number}>{MAX} ETH</div>
               </div>
             </div>
             <div className={styles.group}>
@@ -251,7 +305,7 @@ console.log("array",bids)
           <div className={styles.wrapper}>
             <div className={styles.list}>
               {bids && bids.map((x, index) => (
-                <Card4 className={styles.card} item={x} number={index} />
+                <Card4 className={styles.card} item={x} number={index} key={index}/>
               ))}
               
             </div>

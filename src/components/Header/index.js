@@ -121,8 +121,7 @@ const Headers = () => {
 
 
 
-
-    if (window.ethereum.networkVersion !== "97") {
+    if (window.ethereum.networkVersion != "97") {
       try {
          window.ethereum.request({
           method: 'wallet_switchEthereumChain',

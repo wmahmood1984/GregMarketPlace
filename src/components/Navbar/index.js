@@ -3,91 +3,113 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons'
 
+
+
+
+
 function Navbar() {
-    const data = [
-        {
-            title: "Africa",
-            url: '/region/africa',
-            subMenu: null,
-        },
-        {
-            title: "Americas",
-            url: '/region/america',
-            subMenu: [
-                {
-                    title: "Caribbean",
-                    url: '/sub-region/caribbean',
-                },
-                {
-                    title: "Central America",
-                    url: '/sub-region/central-america',
-                },
-                {
-                    title: "North America",
-                    url: '/sub-region/north-america',
-                },
-                {
-                    title: "South America",
-                    url: '/sub-region/south-america',
-                },
-            ]
-        },
-        {
-            title: "Antarctica",
-            url: '/region/antarctica',
-            subMenu: null,
-        },
-        {
-            title: "Asia",
-            url: '/region/asia',
-            subMenu: [
-                {
-                    title: "Central Asia",
-                    url: '/sub-region/central-asia',
-                },
-                {
-                    title: "East Asia",
-                    url: '/sub-region/east-asia',
-                },
-                {
-                    title: "North Asia",
-                    url: '/sub-region/north-asia',
-                },
-                {
-                    title: "South Asia",
-                    url: '/sub-region/south-asia',
-                },
-                {
-                    title: "South East Asia",
-                    url: '/sub-region/south-east-asia',
-                },
-                {
-                    title: "Western Asia",
-                    url: '/sub-region/western-asia',
-                },
-            ]
-        },
-        {
-            title: "Europe",
-            url: '/region/europe',
-            subMenu: null,
-        },
-        {
-            title: "Oceania",
-            url: '/region/oceania',
-            subMenu: null,
-        },
-        {
-            title: "PixExplorer",
-            url: '/pix-explorer',
-            subMenu: null,
-        },
-        {
-            title: "Events",
-            url: '/events',
-            subMenu: null,
-        },
-    ];
+const data = [
+    {
+        title: "Africa",
+        url: '/region/africa',
+        subMenu: null,
+        code: "00"
+    },
+    {
+        title: "Americas",
+        url: '/region/america',
+        code: "01",
+        subMenu: [
+            {
+                title: "Caribbean",
+                url: '/sub-region/caribbean',
+                code: "0101"
+            },
+            {
+                title: "Central America",
+                url: '/sub-region/central-america',
+                code: "0102"
+            },
+            {
+                title: "North America",
+                url: '/sub-region/north-america',
+                code: "0103"
+            },
+            {
+                title: "South America",
+                url: '/sub-region/south-america',
+                code: "0104"
+            },
+        ]
+    },
+    {
+        title: "Antarctica",
+        url: '/region/antarctica',
+        subMenu: null,
+        code: "02"
+    },
+    {
+        title: "Asia",
+        url: '/region/asia',
+        code: "03",
+        subMenu: [
+            {
+                title: "Central Asia",
+                url: '/sub-region/central-asia',
+                code: "0301"
+            },
+            {
+                title: "East Asia",
+                url: '/sub-region/east-asia',
+                code: "0302"
+            },
+            {
+                title: "North Asia",
+                url: '/sub-region/north-asia',
+                code: "0303"
+            },
+            {
+                title: "South Asia",
+                url: '/sub-region/south-asia',
+                code: "0304"
+            },
+            {
+                title: "South East Asia",
+                url: '/sub-region/south-east-asia',
+                code: "0305"
+            },
+            {
+                title: "Western Asia",
+                url: '/sub-region/western-asia',
+                code: "0305"
+            },
+        ]
+    },
+    {
+        title: "Europe",
+        url: '/region/europe',
+        subMenu: null,
+        code: "04"
+    },
+    {
+        title: "Oceania",
+        url: '/region/oceania',
+        subMenu: null,
+        code: "05"
+    },
+    {
+        title: "PixExplorer",
+        url: '/pix-explorer',
+        subMenu: null,
+        code: "06"
+    },
+    {
+        title: "Events",
+        url: '/events',
+        subMenu: null,
+        code: "07"
+    },
+];
 
     return (
         <>
@@ -96,7 +118,7 @@ function Navbar() {
 
                     <div className='px-5 group' key={index}>
 
-                        <Link to={x.url} className='leading-10 pr-2 text-[#777E90] hover:text-[#afafaf] active:text-[#ffffff]'>
+                        <Link to={{pathname:x.url, state:x.code} }  className='leading-10 pr-2 text-[#777E90] hover:text-[#afafaf] active:text-[#ffffff]'>
                             {x.title}
                         </Link>
 
@@ -108,7 +130,7 @@ function Navbar() {
 
                                 {x.subMenu == null ? null :
                                     x.subMenu.map((i, index) => (
-                                        <Link to={i.url} className='block px-4 py-2 text-sm text-[#6a6b6e] hover:text-black' key={index}>
+                                        <Link to={{pathname:i.url, state:i.code}} className='block px-4 py-2 text-sm text-[#6a6b6e] hover:text-black' key={index}>
                                             {i.title}
                                         </Link>
                                     ))
