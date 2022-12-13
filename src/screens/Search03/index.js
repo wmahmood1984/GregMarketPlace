@@ -42,6 +42,7 @@ const Auction = () => {
   const [values, setValues] = useState([5]);
   const [approvalDone,setApprovalDone]=useState(false)
   const [SaleDone,setSaleDone]=useState(false)
+
   
 
   const [commission,setCommission] = useState()
@@ -78,10 +79,17 @@ const Auction = () => {
 console.log("array",commission)
 
 
-const Sale = async (id,time,_price,add)=>{
+const Sale = async (id,time,_price,add,indOf,ind,travelOffer)=>{
   setSaleDone(true)
+  const trvOff = travelOffer ? 1 : 0
   try {
-    const tx = await marketContract.createSale(id,utils.parseEther(_price),add,{gasLimit:3000000})
+    const tx = await marketContract.createSale(id,utils.parseEther(_price),add,
+    [
+      indOf,
+       
+      trvOff
+    ],ind,
+    {gasLimit:3000000})
 
     await tx.wait()
     
@@ -96,10 +104,21 @@ const Sale = async (id,time,_price,add)=>{
 }
 
 
-const Auction = async (id,time,_price,add)=>{
+const _Auction = async (id,time,_price,add,indOf,ind,travelOffer)=>{
+  
+  
   setSaleDone(true)
+  const trvOff = travelOffer ? 1 : 0
+  
   try {
-    const tx = await marketContract.createAuction(id,Date.parse(time)/1000, utils.parseEther(_price),add,{gasLimit:3000000})
+    const tx = await marketContract.createAuction(
+      id,Date.parse(time)/1000, utils.parseEther(_price),add,
+      [
+        indOf,
+         
+        trvOff
+      ],ind,
+    {gasLimit:3000000})
 
     await tx.wait()
     
@@ -141,6 +160,8 @@ const Approval = async (id,add)=>{
   const STEP = 0.1;
   const MIN = 0.01;
   const MAX = 10;
+
+
 
   return (
     <div className={cn("section-pt80", styles.section)}>
@@ -314,7 +335,7 @@ const Approval = async (id,add)=>{
                 commission={commission && commission}
                 approvalDone={approvalDone}
                 SaleDone={SaleDone} 
-                Auction={Auction}
+                Auction={_Auction}
                 />
               ))}
             </div>
