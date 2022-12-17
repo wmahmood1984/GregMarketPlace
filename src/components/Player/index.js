@@ -8,14 +8,18 @@ const Player = ({ className, item }) => {
   const [URI,setURI] = useState()
   const [bnbPrice,setBnbPrice] = useState()
 
+
+
   useEffect(()=>{
     const abc = async ()=>{
       try {
-        const meta = await axios.get(item.uri,{
+        console.log("first",item.uri[0])        
+        const meta = await axios.get(item.uri[0],{
           headers: {
             'accept': 'application/json'
           }
         })
+
         setURI(meta.data)
         
         const eth = await axios.get(

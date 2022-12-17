@@ -14,12 +14,12 @@ import { formatEther, formatUnits } from 'ethers/lib/utils';
 export default function Component({item,setTokenId,setTokenAdd,setVisibleModalBid}) {
 
     const [URI,setURI] = useState()
-    const [bnbPrice,setBnbPrice] = useState()
+    const [TVLPrice,setTVLPrice] = useState()
 
     useEffect(()=>{
       const abc = async ()=>{
         try {
-          const meta = await axios.get(item.uri,{
+          const meta = await axios.get(item.uri[0],{
             headers: {
               'accept': 'application/json'
             }
@@ -29,7 +29,7 @@ export default function Component({item,setTokenId,setTokenAdd,setVisibleModalBi
           const eth = await axios.get(
             "https://api.coingecko.com/api/v3/coins/binancecoin/market_chart?vs_currency=usd&days=7"
           )
-            setBnbPrice(eth.data.prices[eth.data.prices.length-1][1])
+            setTVLPrice(eth.data.prices[eth.data.prices.length-1][1])
 
         } catch (error) {
           setURI({name:"server error", image:"server errror"})
@@ -53,7 +53,7 @@ export default function Component({item,setTokenId,setTokenAdd,setVisibleModalBi
       return  {name:tx1[0][0],email:tx1[0][1],address:tx1[0][2],image:tx1[0][3]}
     }
 
-    // console.log("item",item.reserve,bnbPrice)
+    // console.log("item",item.reserve,TVLPrice)
 
   return (reduxData&&  item && 
     <div>
@@ -75,14 +75,14 @@ export default function Component({item,setTokenId,setTokenAdd,setVisibleModalBi
                           </div>
                           <div className={styles.description}>
                             <div className={styles.category}>Instant price</div>
-                            <div className={styles.text}>{`${formatEther(item.reserve)} BNB`}</div>
+                            <div className={styles.text}>{`${formatEther(item.reserve)} TVL`}</div>
                           </div>
                         </div>
                       </div>
                       <div className={styles.wrap}>
                         <div className={styles.info}>Current Bid</div>
-                        <div className={styles.currency}>{`${formatEther(item.reserve)} BNB`}</div>
-                        <div className={styles.price}>{bnbPrice &&  `$${(formatEther(item.reserve) *bnbPrice).toFixed(3) }`}</div>
+                        <div className={styles.currency}>{`${formatEther(item.reserve)} TVL`}</div>
+                        <div className={styles.price}>{TVLPrice &&  `$${(Number(formatEther(item.reserve))).toFixed(0) }`}</div>
                         
                         <Timer2
                         start={formatUnits(item.auctionEnd,0) }

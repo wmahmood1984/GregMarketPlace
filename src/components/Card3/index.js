@@ -23,7 +23,7 @@ export const getContract = (library, account,add,abi) => {
 
 
 
-const Card3 = ({Approval, className, item,Sale,commission,approvalDone,SaleDone,Auction }) => {
+const Card3 = ({Approval, className, item,Sale,commission,approvalDone,SaleDone,Auction,description,setDescription }) => {
   const [visibleModalSale, setVisibleModalSale] = useState(false);
   const [visibleModal, setVisibleModal] = useState(false);
   const {library,account} = useWeb3React()
@@ -93,6 +93,8 @@ console.log("check",Check,item.token_id,item.token_address)
         id={item && utils.formatUnits(item.token_id,0)}
         add={item && item.token_address}
         saleAuction={"Sale"}
+        description={description}
+        setDescription={setDescription}
         // cancelandSaleDone={cancelandSaleDone}
         // setcancelAndSaleDone={setcancelAndSaleDone}
         // cancleAndSale={cancleAndSale}
@@ -111,6 +113,9 @@ console.log("check",Check,item.token_id,item.token_address)
         id={item && utils.formatUnits(item.token_id,0)}
         add={item && item.token_address}
         saleAuction={"Auction"}
+        description={description}
+        setDescription={setDescription}
+
         // cancelandSaleDone={cancelandSaleDone}
         // setcancelAndSaleDone={setcancelAndSaleDone}
         // cancleAndSale={cancleAndSale}

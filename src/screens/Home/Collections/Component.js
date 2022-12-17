@@ -12,7 +12,7 @@ export default function Component({item}) {
     useEffect(()=>{
       const abc = async ()=>{
         try {
-          const meta = await axios.get(item.uri,{
+          const meta = await axios.get(item.uri[0],{
             headers: {
               'accept': 'application/json'
             }

@@ -74,8 +74,8 @@ console.log("bidder",highestBidder)
                 </span>
             </div>
             <div className={styles.cost}>
-              <div className={styles.price}>{highestBid} BNB</div>
-              <div className={styles.price}>${highestBid*200}</div>
+              <div className={styles.price}>{highestBid} TVL</div>
+              <div className={styles.price}>${highestBid}</div>
             </div>
             <div className={styles.cost}>
                  
@@ -126,7 +126,7 @@ console.log("bidder",highestBidder)
 
         <div className={styles.text}>
           Service fee <span className={styles.percent}>{commission}%</span>{" "}
-          <span>{highestBid * commission /100} BNB</span> <span>${highestBid * commission /100 *200}</span>
+          <span>{highestBid * commission /100} TVL</span> <span>${highestBid * commission /100 }</span>
         </div>
         {
           owner==account ?

@@ -13,7 +13,7 @@ import Dropdown from "../../../../components/Dropdown";
 const categoriesOptions = ["Adventure","Airlines","Art","Cruise","Culture","Ecotourism","Gastronomy","Honeymoon","Hotels","Luxury","Photography","Safaris","Sports","Others"];
 const Continents = Cdata.map((v,e)=>v.title)
 
-const PutSale2 = ({saleAuction,Approval,Sale, className,setVisibleModalSale,cancelandSaleDone,commission,id,add,approvalDone,SaleDone }) => {
+const PutSale2 = ({saleAuction,Approval,Sale, className,setVisibleModalSale,cancelandSaleDone,commission,id,add,approvalDone,SaleDone,description,setDescription }) => {
   const [categories, setCategories] = useState(categoriesOptions[0]);
 
   const [price,setPrice] = useState(0)
@@ -39,7 +39,7 @@ const PutSale2 = ({saleAuction,Approval,Sale, className,setVisibleModalSale,canc
     },
     {
       title: "Total amount",
-      value: `${price - Number(price)* commission/100} BNB`,
+      value: `${price - Number(price)* commission/100} TVL`,
     },
     ];
 
@@ -74,6 +74,10 @@ const PutSale2 = ({saleAuction,Approval,Sale, className,setVisibleModalSale,canc
           <div className={styles.row} >
             <div className={styles.col}>Enter your Price</div>
             <input type="number" value={price} onChange={(e)=>{setPrice(e.target.value)}} className={styles.col}></input>
+          </div>
+          <div className={styles.row} >
+            <div className={styles.col}>Enter Description</div>
+            <input type="text" value={description} onChange={(e)=>{setDescription(e.target.value)}} className={styles.col}></input>
           </div>
           {saleAuction=="Auction"? 
             <div className={styles.row} >

@@ -11,8 +11,11 @@ import Preview from "./Preview";
 import Cards from "./Cards";
 import FolowSteps from "./FolowSteps";
 import { Contract, utils } from "ethers";
-import { Cdata, MarketAbi, MarketAdd, TokenAbi, TokenAdd } from "../../config";
+import { Cdata, ERC20, IERC20, MarketAbi, MarketAdd, TokenAbi, TokenAdd } from "../../config";
 import { useWeb3React } from "@web3-react/core";
+import { useDispatch } from "react-redux";
+import { getData } from "../../state/ui";
+import { formatUnits } from "ethers/lib/utils";
 
 
 
@@ -76,6 +79,7 @@ const Upload = () => {
   const [lockLoader,setLockLoader] = useState(false)
   const { account,library,chainId } = useWeb3React();
   const tokenContract = getContract(library, account,TokenAdd,TokenAbi);
+  const TVLContract = getContract(library, account,ERC20,IERC20);
   const marketContract = getContract(library, account,MarketAdd,MarketAbi);
   const [visibleModal, setVisibleModal] = useState(false);
   const [PriceinEth, setPriceEth] = useState(0);
@@ -86,6 +90,9 @@ const Upload = () => {
   const [subConInd, setsubConInd] = useState(0);
   const [country, setCountry] = useState();
   const [countryInd, setCountryInd] = useState(0);
+  const [play, setPlay] = useState(false);
+  const dispatch = useDispatch()
+
 
   const [visiblePreview, setVisiblePreview] = useState(false);
 
@@ -109,7 +116,9 @@ useEffect(()=>{
   const abc = async ()=>{
     if(account){
       const _counter = await tokenContract.tokenCounter()
-      setCounter(_counter)
+
+      setCounter(formatUnits(_counter,0))
+      
     }
 
 
@@ -154,14 +163,16 @@ const captureFile = async(e)=>{
 });}
 }
 
+Counter && console.log("video",Counter)
+
 
 
 
 const upLoadNFT = async ()=>{
   setMintingLoader(true)
  
-  const obj = {image,name,description,PriceinEth,royalties,size,sale,price,travelOffer,album:items[album].title,minter_address:account}
-
+  const obj = {image:image,name,description,PriceinEth,royalties,size,sale,price,travelOffer,album:items[album].title,minter_address:account}
+  console.log("obe",obj)
   const jsonObj = JSON.stringify(obj)
   const jsonIPFS = await client.add(jsonObj)
   const tx = await tokenContract.Mint(account,jsonIPFS.path,
@@ -190,8 +201,28 @@ const clearAll = ()=>{
 
 const approval = async ()=>{
   setApprovalLoader(true)
+
+  const count = Counter && Counter
+  console.log("Counter",count)
   try {
-    const tx = await tokenContract.approve(MarketAdd,Counter)
+    const tx = await tokenContract.approve(MarketAdd,count)
+    await tx.wait()
+    
+    if(tx){
+      console.log("tx",tx)
+      setApprovalLoader(false)
+      setApprovalDone(true)
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+
+const TVLapproval = async ()=>{
+  setApprovalLoader(true)
+  try {
+    const tx = await TVLContract.approve(MarketAdd,0)
     await tx.wait()
     
     if(tx){
@@ -212,14 +243,15 @@ setLockLoader(true)
     const ind = indexGenerator(continentInd,subConInd,countryInd)
     console.log("first",ind)
     const trvOff = travelOffer ? 1 : 0
+    const playAble = play ? 1 : 0
     
     const tx = await marketContract.createAuction(
         Counter,Date.parse(AuctionEnd)/1000,utils.parseUnits(PriceinEth.toString(),"ether") ,TokenAdd
     ,    [
       categoriesOptions.indexOf(categories),
        
-      trvOff
-    ],ind,
+      trvOff,playAble
+    ],ind,description,
     
     {gasLimit:3000000}
         )
@@ -230,6 +262,7 @@ setLockLoader(true)
       setLockdone(true)
       setLockLoader(false)
       setVisibleModal(false)
+      dispatch(getData({}))
     }
   } catch (error) {
     console.log(error)
@@ -244,13 +277,14 @@ const Lock3 = async ()=>{
     try {
       const ind = indexGenerator(continentInd,subConInd,countryInd)
       const trvOff = travelOffer ? 1 : 0
+      const playAble = play? 1: 0
       const tx = await marketContract.createSale(
           Counter,utils.parseUnits(PriceinEth.toString(),"ether") ,TokenAdd
           ,    [
             categoriesOptions.indexOf(categories),
            
-            trvOff
-          ],  ind,
+            trvOff,playAble
+          ],  ind,description,
       
       {gasLimit:3000000}
           )
@@ -261,6 +295,7 @@ const Lock3 = async ()=>{
         setLockdone(true)
         setLockLoader(false)
         setVisibleModal(false)
+        dispatch(getData({}))
       }
     } catch (error) {
       console.log(error)
@@ -338,7 +373,7 @@ const Lock = async ()=>{
                     style={{display:"flex",flexWrap:"wrap"}}
                     //className={styles.row}
                     >
-                      <div style={{marginTop:"5px"}} className={styles.col}>
+                      <div className={styles.col}>
                         <div className={styles.field}>
                           <div className={styles.label}>Royalties</div>
                           <Dropdown
@@ -377,7 +412,7 @@ const Lock = async ()=>{
                       </div>
                       <div className={styles.col}>
                       <div className={styles.field}>
-                        <div className={styles.label}>Sub-Continent / Countries</div>
+                        <div className={styles.label}>Sub-Cont / Count</div>
                         <Dropdown
                           className={styles.dropdown}
                           value={subCon}
@@ -402,7 +437,7 @@ const Lock = async ()=>{
                       </div> :  null
                       }
                       
-                      <div className={styles.col}>
+                      {/* <div className={styles.col}>
                         <TextInput
                           className={styles.field}
                           label="Size"
@@ -413,7 +448,7 @@ const Lock = async ()=>{
                           placeholder="e. g. Size"
                           required
                         />
-                      </div>
+                      </div> */}
                       <div className={styles.col}>
                         <TextInput
                           className={styles.field}
@@ -426,7 +461,7 @@ const Lock = async ()=>{
                           required
                         />
                       </div>
-                      <div className={styles.col}>
+                      {/* <div className={styles.col}>
                         <TextInput
                           className={styles.field}
                           label="Properties"
@@ -437,7 +472,7 @@ const Lock = async ()=>{
                           placeholder="e. g. Properties"
                           required
                         />
-                      </div>
+                      </div> */}
                       
                       <div className={styles.col}>
                         <TextInput
@@ -468,7 +503,7 @@ const Lock = async ()=>{
                   <div className={styles.box}>
                     <div className={styles.category}>Instant sale price</div>
                     <div className={styles.text}>
-                      Enter the price for which the item will be instantly sold
+                      Your NFT will be sold instantly
                     </div>
                   </div>
                   <Switch value={price} setValue={setPrice} />
@@ -481,6 +516,15 @@ const Lock = async ()=>{
                     </div>
                   </div>
                   <Switch value={travelOffer} setValue={settravelOffer} />
+                </div>
+                <div className={styles.option}>
+                  <div className={styles.box}>
+                    <div className={styles.category}>Playable NFT</div>
+                    <div className={styles.text}>
+                      Select if the NFT is playable
+                    </div>
+                  </div>
+                  <Switch value={play} setValue={setPlay} />
                 </div>
                 {/* <div className={styles.category}>Choose collection</div>
                 <div className={styles.text}>
@@ -517,7 +561,7 @@ const Lock = async ()=>{
           <Preview
 
           clearAll={clearAll}
-          obj={{image,name,description,PriceinEth,royalties,size,sale,price,travelOffer,album:items[album].title}}
+          obj={{image,name,description,PriceinEth,royalties,size,sale,price,travelOffer,album:items[album].title,play}}
           className={cn(styles.preview, { [styles.active]: visiblePreview })}
           onClose={() => setVisiblePreview(false)}
         />: null 

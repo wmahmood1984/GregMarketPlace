@@ -5,7 +5,7 @@ import Icon from "../../../components/Icon";
 
 const Preview = ({ className, onClose,obj,clearAll }) => {
 
-  const {image,name,description,PriceinEth,royalties,size,sale,price,locking,album} = obj
+  const {image,name,description,PriceinEth,royalties,size,sale,price,locking,album,play} = obj
   return (
     <div className={cn(className, styles.wrap)}>
       <div className={styles.inner}>
@@ -15,17 +15,22 @@ const Preview = ({ className, onClose,obj,clearAll }) => {
         <div className={styles.info}>Preview</div>
         <div className={styles.card}>
           <div className={styles.preview}>
-            <img
-              srcSet={image}
-              src={image}
+            {!play ? <img
+//              srcSet={image && image}
+              src={image && image}
               alt="Card"
-            />
+            /> : <video width="360" height="240" autoPlay>
+              <source src={image && image} type="video/mp4"></source>
+              <source src={image && image} type="video/ogg"></source>
+            </video>
+
+            }
           </div>
           <div className={styles.link}>
             <div className={styles.body}>
               <div className={styles.line}>
                 <div className={styles.title}>{name}</div>
-                <div className={styles.price}>{PriceinEth} ETH</div>
+                <div className={styles.price}>{PriceinEth} TVL</div>
               </div>
               {/* <div className={styles.line}>
                 <div className={styles.users}>

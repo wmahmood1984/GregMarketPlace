@@ -5,11 +5,11 @@ import { Range, getTrackBackground } from "react-range";
 import Icon from "../../components/Icon";
 import Card from "../../components/Card";
 import Dropdown from "../../components/Dropdown";
-import { filterBids, filterByPrice, sortBids, sortBidsAsc, sortBidsDes, sortByPrice } from "../../state/ui";
+import { filterBids, filterByCountry, filterByPrice, sortBids, sortBidsAsc, sortBidsDes, sortByPrice } from "../../state/ui";
 // data
 //import { bids } from "../../mocks/bids";
 import { Contract } from "ethers";
-import { MarketAbi, MarketAdd } from "../../config";
+import { combinedCountries, MarketAbi, MarketAdd } from "../../config";
 import { useWeb3React } from "@web3-react/core";
 import Card2 from "../../components/Card2";
 import { useDispatch, useSelector } from "react-redux";
@@ -19,7 +19,7 @@ const navLinks = ["All items", "Adventure","Airlines","Art","Cruise","Culture","
 
 const dateOptions = ["Newest", "Oldest"];
 const likesOptions = ["Most liked", "Least liked"];
-const colorOptions = ["All colors", "Black", "Green", "Pink", "Purple"];
+const colorOptions = combinedCountries.map((v,e)=>v.country);
 const creatorOptions = ["Verified only", "All", "Most liked"];
 
 
@@ -79,6 +79,12 @@ const Search = () => {
 const Filter = (num)=>{
   setCategory(num)
   dispatch(filterBids(navLinks.indexOf(num)))
+}
+
+
+const FilterbyCountry = (num)=>{
+  setColor(num)
+  dispatch(filterByCountry(combinedCountries[colorOptions.indexOf(num)].code))
 }
 
 const bids7 = useSelector((state) => {
@@ -160,6 +166,7 @@ console.log("array",bids)
               value={date}
               setValue={Sort}
               options={dateOptions}
+              setInd={()=>{}}
             />
           </div>
           {/* <div className={styles.nav}>
@@ -181,6 +188,7 @@ console.log("array",bids)
               value={category}
               setValue={Filter}
               options={navLinks}
+              setInd={()=>{}}
             />
           </div>
         </div>
@@ -258,14 +266,14 @@ console.log("array",bids)
                         backgroundColor: "#141416",
                       }}
                     >
-                      {values[0].toFixed(4)}
+                      {values[0].toFixed(0)}
                     </div>
                   </div>
                 )}
               />
               <div className={styles.scale}>
-              <div className={styles.number}>{MIN} ETH</div>
-                <div className={styles.number}>{MAX} ETH</div>
+              <div className={styles.number}>{MIN} TVL</div>
+                <div className={styles.number}>{MAX} TVL</div>
               </div>
             </div>
             <div className={styles.group}>
@@ -276,15 +284,17 @@ console.log("array",bids)
                   value={likes}
                   setValue={setLikes}
                   options={likesOptions}
+                  setInd={()=>{}}
                 />
               </div>
               <div className={styles.item}>
-                <div className={styles.label}>Color</div>
+                <div className={styles.label}>Country</div>
                 <Dropdown
                   className={styles.dropdown}
                   value={color}
-                  setValue={setColor}
+                  setValue={FilterbyCountry}
                   options={colorOptions}
+                  setInd={()=>{}}
                 />
               </div>
               <div className={styles.item}>
@@ -294,6 +304,7 @@ console.log("array",bids)
                   value={creator}
                   setValue={setCreator}
                   options={creatorOptions}
+                  setInd={()=>{}}
                 />
               </div>
             </div>

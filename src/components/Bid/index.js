@@ -53,13 +53,15 @@ const Bid = ({ className,tokenId,AddressOfToken,setVisibleModalBid,toggle,setTog
     abc()
   }, [])
 
-  console.log( tokenId,AddressOfToken )
+  console.log("allowance in " ,allowance,bid )
 
+
+  
 
 
   const placeBid = async ()=>{
     try {
-      const tx = await marketContract.bid(tokenId,AddressOfToken,{gasLimit:3000000,value:utils.parseUnits(bid.toString(),"ether")})
+      const tx = await marketContract.bid(tokenId,AddressOfToken,utils.parseUnits(bid.toString(),"ether"),{gasLimit:3000000})
 
       await tx.wait()
 
@@ -77,8 +79,8 @@ const Bid = ({ className,tokenId,AddressOfToken,setVisibleModalBid,toggle,setTog
     <div className={cn(className, styles.checkout)}>
       <div className={cn("h4", styles.title)}>Place a bid</div>
       <div className={styles.info}>
-        You are about to purchase <strong>C O I N Z</strong> from{" "}
-        <strong>UI8</strong>
+        You are about to purchase <strong>NFT</strong>
+        
       </div>
       <div className={styles.stage}>Your bid</div>
       <div className={styles.table}>
@@ -94,14 +96,15 @@ const Bid = ({ className,tokenId,AddressOfToken,setVisibleModalBid,toggle,setTog
 
       <div className={styles.cow}>
             <div className={styles.col}>Total amount </div>
-            <div className={styles.col}>{balance &&  ((Number(bid) + Number(formatEther(serviceFee))*bid)).toFixed(4)}</div>
+            <div className={styles.col}>{balance &&  ((Number(bid) + Number(formatEther(serviceFee))*bid)).toFixed(0)}</div>
       </div>
       
       </div>
       <div className={styles.btns}>
-        {allowance>=bid?
-        <button onClick={Approval} className={cn("button", styles.button)}>Approve TVL</button>:
-        <button onClick={placeBid} className={cn("button", styles.button)}>Place a bid</button> 
+        {Number(allowance)>=Number(bid)?
+                <button onClick={placeBid} className={cn("button", styles.button)}>Place a bid</button>
+       :       <button onClick={Approval} className={cn("button", styles.button)}>Approve TVL</button>
+ 
         }  
         <button onClick={()=>{setVisibleModalBid(false)}} className={cn("button-stroke", styles.button)}>Cancel</button>
       </div>

@@ -13,8 +13,10 @@ import { MarketAbi, MarketAdd, TokenAbi } from "../../config";
 import { useWeb3React } from "@web3-react/core";
 
 import Card3 from "../../components/Card3";
+import { useDispatch } from "react-redux";
+import { filterBids } from "../../state/ui";
 
-const navLinks = ["All items", "Art", "Game", "Photography", "Music", "Video"];
+const navLinks = ["All items", "Adventure","Airlines","Art","Cruise","Culture","Ecotourism","Gastronomy","Honeymoon","Hotels","Luxury","Photography","Safaris","Sports","Others"];
 
 const dateOptions = ["Newest", "Oldest"];
 const likesOptions = ["Most liked", "Least liked"];
@@ -32,6 +34,7 @@ export const getContract = (library, account,add,abi) => {
 
 const Auction = () => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [category, setCategory] = useState(navLinks[0]);
   const [date, setDate] = useState(dateOptions[0]);
   const [likes, setLikes] = useState(likesOptions[0]);
   const [color, setColor] = useState(colorOptions[0]);
@@ -39,14 +42,15 @@ const Auction = () => {
   const { account,library,chainId } = useWeb3React();
   const [search, setSearch] = useState("");
   const [bids, setAuctions] = useState("");
-  const [values, setValues] = useState([5]);
+  const [values, setValues] = useState([0.0003]);
   const [approvalDone,setApprovalDone]=useState(false)
   const [SaleDone,setSaleDone]=useState(false)
+  const [description,setDescription] = useState()
 
   
 
   const [commission,setCommission] = useState()
-
+  const dispatch = useDispatch()
   const marketContract = getContract(library, account,MarketAdd,MarketAbi);
 
   const [toggle,setToggle] = useState()
@@ -76,7 +80,13 @@ const Auction = () => {
   },[account,toggle])
 
 
-console.log("array",commission)
+console.log("array",bids)
+
+
+const Filter = (num)=>{
+  setCategory(num)
+//  dispatch(filterBids(navLinks.indexOf(num)))
+}
 
 
 const Sale = async (id,time,_price,add,indOf,ind,travelOffer)=>{
@@ -88,7 +98,7 @@ const Sale = async (id,time,_price,add,indOf,ind,travelOffer)=>{
       indOf,
        
       trvOff
-    ],ind,
+    ],ind,description,
     {gasLimit:3000000})
 
     await tx.wait()
@@ -117,7 +127,7 @@ const _Auction = async (id,time,_price,add,indOf,ind,travelOffer)=>{
         indOf,
          
         trvOff
-      ],ind,
+      ],ind,description,
     {gasLimit:3000000})
 
     await tx.wait()
@@ -157,9 +167,9 @@ const Approval = async (id,add)=>{
     alert();
   };
 
-  const STEP = 0.1;
-  const MIN = 0.01;
-  const MAX = 10;
+  const STEP = 0.0001;
+  const MIN = 0.0001;
+  const MAX = 0.0005;
 
 
 
@@ -196,7 +206,16 @@ const Approval = async (id,add)=>{
               options={dateOptions}
             />
           </div>
-          <div className={styles.nav}>
+          <div className={styles.dropdown}>
+            <Dropdown
+              className={styles.dropdown}
+              value={category}
+              setValue={Filter}
+              options={navLinks}
+              setInd={()=>{}}
+            />
+          </div>
+          {/* <div className={styles.nav}>
             {navLinks.map((x, index) => (
               <button
                 className={cn(styles.link, {
@@ -208,7 +227,7 @@ const Approval = async (id,add)=>{
                 {x}
               </button>
             ))}
-          </div>
+          </div> */}
         </div>
         <div className={styles.row}>
           <div className={styles.filters}>
@@ -279,14 +298,14 @@ const Approval = async (id,add)=>{
                         backgroundColor: "#141416",
                       }}
                     >
-                      {values[0].toFixed(1)}
+                      {values[0].toFixed(0)}
                     </div>
                   </div>
                 )}
               />
               <div className={styles.scale}>
-                <div className={styles.number}>0.01 ETH</div>
-                <div className={styles.number}>10 ETH</div>
+                <div className={styles.number}>0.01 TVL</div>
+                <div className={styles.number}>10 TVL</div>
               </div>
             </div>
             <div className={styles.group}>
@@ -336,6 +355,8 @@ const Approval = async (id,add)=>{
                 approvalDone={approvalDone}
                 SaleDone={SaleDone} 
                 Auction={_Auction}
+                setDescription={setDescription}
+                description={description}
                 />
               ))}
             </div>

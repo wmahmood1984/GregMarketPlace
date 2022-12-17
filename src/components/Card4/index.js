@@ -19,11 +19,16 @@ const Card4 = ({ className, item }) => {
   useEffect(()=>{
     const abc = async ()=>{
       try {
-        const meta = await axios.get(item.uri,{
+        const meta = await axios.get(item.uri[0],{
           headers: {
             'accept': 'application/json'
           }
         })
+
+        console.log("item ",item)
+        console.log("item.uri ",item.uri)
+        console.log("item.uri ",item[0].uri)
+        console.log("meta ",meta)
         setURI(meta.data)        
       } catch (error) {
         setURI({name:"server error", image:"server errror"})
@@ -48,7 +53,7 @@ const getName = (add)=>{
   return  {name:tx1[0][0],email:tx1[0][1],address:tx1[0][2],image:tx1[0][3]}
 }
 
-// //URI && console.log("URI ",URI.name)
+
 // console.log("category ",formatUnits(item.category,0))
 // console.log("token id ",formatUnits(item.tokenId,0))
 
@@ -79,11 +84,11 @@ const getName = (add)=>{
           </button>
         </div>
       </div>
-      <Link className={styles.link} to={{pathname: `/item/${0}`, state:{item}} }>
+      <Link className={styles.link} to={{pathname: `/item/${utils.formatUnits(item.index,0)}`, state:{item}} }>
         <div className={styles.body}>
           <div className={styles.line}>
              <div className={styles.title}>{URI && URI.name}</div>
-           <div className={styles.price}>{item.reserve &&  utils.formatEther(item.reserve) }</div>
+           <div className={styles.price}>{item.reserve &&  utils.formatEther(item.reserve) }{" "}TVL </div>
           </div>
           <div className={styles.line}>
             <div className={styles.users}>

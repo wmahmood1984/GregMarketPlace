@@ -22,6 +22,7 @@ import Country from "./screens/Regions/Countries";
 import ContactUs from "./screens/ContactUs";
 import AboutUs from "./screens/AboutUs";
 import Auction from "./screens/Search03";
+import Upload2 from "./screens/UploadDetails/upload2";
 
 function App() {
   return (
@@ -44,6 +45,13 @@ function App() {
         <Route exact path="/upload-details" render={() => (
           <Page>
             <UploadDetails />
+          </Page>
+        )}
+        />
+
+        <Route exact path="/upload-details2" render={() => (
+          <Page>
+            <Upload2 />
           </Page>
         )}
         />

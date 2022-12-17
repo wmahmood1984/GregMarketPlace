@@ -22,7 +22,7 @@ const items = [
     image2x: "/images/content/upload-pic-1@2x.jpg",
   },
   {
-    url: "/upload-details",
+    url: "/upload-details2",
     buttonText: "Create Multiple",
     image: "/images/content/upload-pic-2.jpg",
     image2x: "/images/content/upload-pic-2@2x.jpg",

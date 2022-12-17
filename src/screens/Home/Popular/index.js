@@ -177,12 +177,12 @@ const Popular = () => {
                   <div className={styles.head}>
                     <div
                       className={styles.rating}
-                      style={{ backgroundColor: items2[index].color }}
+                      style={{ backgroundColor: items[index].color }}
                     >
                       <div className={styles.icon}>
-                        <img src={items2[index].sign} alt="Rating" />
+                        <img src={items[index].sign} alt="Rating" />
                       </div>
-                      <div className={styles.number}>#{items2[index].number}</div>
+                      <div className={styles.number}>#{items[index].number}</div>
                     </div>
                     <div className={styles.control}>
                       <Add className={styles.button} />
@@ -195,13 +195,13 @@ const Popular = () => {
                     <div className={styles.avatar}>
                       <img src={x[3]} alt="Avatar" />
                       <div className={styles.reward}>
-                        <img src={items2[index].reward} alt="Reward" />
+                        <img src={items[index].reward} alt="Reward" />
                       </div>
                     </div>
                     <div className={styles.name}>{x[0]}</div>
                     <div
                       className={styles.price}
-                      dangerouslySetInnerHTML={{ __html: items2[index].price }}
+                      dangerouslySetInnerHTML={{ __html: items[index].price }}
                     />
                   </div>
                 </div>

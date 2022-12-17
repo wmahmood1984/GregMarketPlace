@@ -15,7 +15,7 @@ export default function Component({x}) {
     useEffect(()=>{
       const abc = async ()=>{
         try {
-          const meta = await axios.get(x.uri,{
+          const meta = await axios.get(x.uri[0],{
             headers: {
               'accept': 'application/json'
             }

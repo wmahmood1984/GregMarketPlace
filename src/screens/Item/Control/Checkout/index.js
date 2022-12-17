@@ -42,7 +42,7 @@ const Checkout = ({purchase,setVisibleModalPurchase,purchasing,setPurchasing, cl
     },
     {
       title: "You will pay",
-      value: `${(Number(price)+Number(commission*price/100)).toFixed(4)} ETH`,
+      value: `${(Number(price)+Number(commission*price/100)).toFixed(0)} ETH`,
     },
   ];
   return (

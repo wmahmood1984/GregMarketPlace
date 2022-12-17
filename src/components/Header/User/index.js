@@ -36,7 +36,7 @@ const User = ({ className }) => {
             <img src={`https://avatars.dicebear.com/api/pixel-art/asdwa.svg`} alt="Avatar" />
           </div>
           <div className={styles.wallet}>
-            7.00698 <span className={styles.currency}>BNB</span>
+            7.00698 <span className={styles.currency}>TVL</span>
           </div>
         </div>
         {visible && (

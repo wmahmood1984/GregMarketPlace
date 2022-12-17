@@ -543,6 +543,22 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
 }
 
 
+interface IERC20 {
+
+    function totalSupply() external view returns (uint256);
+    function balanceOf(address account) external view returns (uint256);
+    function transfer(address recipient, uint256 amount) external returns (bool);
+    function allowance(address owner, address spender) external view returns (uint256);
+    function approve(address spender, uint256 amount) external returns (bool);
+    function name() external view returns(string memory);
+    function symbol() external view returns(string memory);
+    function decimals() external view  returns (uint8);
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+
+
 contract marketPlace is IERC721Receiver, ReentrancyGuard{
     using Address for address;
    
@@ -554,7 +570,9 @@ contract marketPlace is IERC721Receiver, ReentrancyGuard{
     mapping(address=>mapping(uint256=>uint256)) public AuctionArrayIndex;
     uint256 public commissionRate = 5;
     uint256 public bidfee = 5;
-
+    mapping(address=>mapping(uint256=>address)) public OriginalAuctioneer;
+    uint256 public royaltyFee = 1;
+    IERC20 TVL = IERC20(0x2fC5021C7745C38d7Bf783ED3b1961bA150fae36);
 
 
 
@@ -573,6 +591,7 @@ contract marketPlace is IERC721Receiver, ReentrancyGuard{
         address payable beneficiary;
         uint auctionEnd;
 
+
         // Current state of the auction.
         address[] highestBidder;
         uint[] highestBid;
@@ -586,6 +605,10 @@ contract marketPlace is IERC721Receiver, ReentrancyGuard{
         address soldTo;
         uint256 soldFor;
         bool UpForSale;
+        address royaltyHolder;
+        uint256[] category_album_collectible;  // first element is category, second is collectible or not, third is video or not
+        string[2] uri;
+        string album;
 
     }
 
@@ -604,16 +627,24 @@ contract marketPlace is IERC721Receiver, ReentrancyGuard{
 
 
 
-    function createAuction(uint256 tokenId, uint _closingTime, uint256 _reservePrice,address _erc721) public {
-        IERC721 TERC721 = IERC721(_erc721);
+    function createAuction(uint256 tokenId, uint _closingTime, uint256 _reservePrice,address _erc721,uint256[] memory _category_album_collectible, string memory _album,string memory _desc) public {
+        ERC721 TERC721 = ERC721(_erc721);
         require(TERC721.getApproved(tokenId)==address(this),"marketplace is not authorized");
         require(sellBidPrice[_erc721][tokenId]==0, "ERC721Matcha: The selected NFT is open for sale, cannot be auctioned");
         require(!auctions[_erc721][tokenId].open, "ERC721Matcha: The selected NFT already has an auction");
         require(TERC721.ownerOf(tokenId)==msg.sender, "ERC721Matcha: Only owner can auction this item");
+        string memory uri = TERC721.tokenURI(tokenId);
+        string[2] memory uri_des = [uri,_desc];
+        if(OriginalAuctioneer[_erc721][tokenId]==address(0)){
+            OriginalAuctioneer[_erc721][tokenId]=msg.sender;
+        }
 
-        Auction memory tx1 = Auction(tokenId,_erc721, payable(msg.sender),_closingTime,new address[](0),new uint256[](0),true,_reservePrice,AuctionArrayIndexNumber,address(0),0,false);
+        address royaltyHolder = OriginalAuctioneer[_erc721][tokenId];
+
+        Auction memory tx1 = Auction(tokenId,_erc721, payable(msg.sender),_closingTime,new address[](0),new uint256[](0),true,_reservePrice,AuctionArrayIndexNumber,address(0),0,false,royaltyHolder,_category_album_collectible,uri_des,_album);
         AuctionArray.push(tx1);
         AuctionArrayIndex[_erc721][tokenId]=AuctionArrayIndexNumber;
+        
 
         auctions[_erc721][tokenId].tokenId = tokenId;
         auctions[_erc721][tokenId].tokenAdd = _erc721;
@@ -622,18 +653,30 @@ contract marketPlace is IERC721Receiver, ReentrancyGuard{
         auctions[_erc721][tokenId].reserve = _reservePrice;
         auctions[_erc721][tokenId].index = AuctionArrayIndexNumber;
         auctions[_erc721][tokenId].open = true;
+        auctions[_erc721][tokenId].category_album_collectible = _category_album_collectible;
+        auctions[_erc721][tokenId].uri = uri_des;
+        auctions[_erc721][tokenId].album = _album;
+ 
+
         TERC721.safeTransferFrom(msg.sender,address(this), tokenId);
         AuctionArrayIndexNumber++;
     }
 
-    function createAuction2(address user,uint256 tokenId, uint _closingTime, uint256 _reservePrice,address _erc721) public {
-        IERC721 TERC721 = IERC721(_erc721);
+    function createAuction2(address user,uint256 tokenId, uint _closingTime, uint256 _reservePrice,address _erc721,uint256[] memory _category_album_collectible,string memory _album,string memory _desc) public {
+        ERC721 TERC721 = ERC721(_erc721);
         require(TERC721.getApproved(tokenId)==address(this),"marketplace is not authorized");
         require(sellBidPrice[_erc721][tokenId]==0, "ERC721Matcha: The selected NFT is open for sale, cannot be auctioned");
         require(!auctions[_erc721][tokenId].open, "ERC721Matcha: The selected NFT already has an auction");
      //   require(TERC721.ownerOf(tokenId)==user, "ERC721Matcha: Only owner can auction this item");
+                string memory uri = TERC721.tokenURI(tokenId);
+                string[2] memory uri_des = [uri,_desc];
+        if(OriginalAuctioneer[_erc721][tokenId]==address(0)){
+            OriginalAuctioneer[_erc721][tokenId]=msg.sender;
+        }
 
-        Auction memory tx1 = Auction(tokenId,_erc721, payable(user),_closingTime,new address[](0),new uint256[](0),true,_reservePrice,AuctionArrayIndexNumber,address(0),0,false);
+        address royaltyHolder = OriginalAuctioneer[_erc721][tokenId];
+
+        Auction memory tx1 = Auction(tokenId,_erc721, payable(user),_closingTime,new address[](0),new uint256[](0),true,_reservePrice,AuctionArrayIndexNumber,address(0),0,false,royaltyHolder,_category_album_collectible,uri_des,_album);
         AuctionArray.push(tx1);
         AuctionArrayIndex[_erc721][tokenId]=AuctionArrayIndexNumber;
 
@@ -644,6 +687,10 @@ contract marketPlace is IERC721Receiver, ReentrancyGuard{
         auctions[_erc721][tokenId].reserve = _reservePrice;
         auctions[_erc721][tokenId].index = AuctionArrayIndexNumber;
         auctions[_erc721][tokenId].open = true;
+        auctions[_erc721][tokenId].category_album_collectible = _category_album_collectible;
+        auctions[_erc721][tokenId].uri = uri_des;
+        auctions[_erc721][tokenId].album = _album;        
+
         TERC721.safeTransferFrom(user,address(this), tokenId);
         AuctionArrayIndexNumber++;
     }
@@ -653,24 +700,40 @@ contract marketPlace is IERC721Receiver, ReentrancyGuard{
              uint256[] memory tokenId, 
             uint[] memory _closingTime, 
             uint256[] memory _reservePrice,
-                address[] memory _erc721) public {
+                address[] memory _erc721,uint256[][] memory _categories, string[] memory _album, string[] memory _desc) public {
 
  
                  for(uint256 i = 0 ; i < _users.length; i++){
-                    createAuction2(_users[i],tokenId[i],_closingTime[i], _reservePrice[i],_erc721[i]);
+                    createAuction2(_users[i],tokenId[i],_closingTime[i], _reservePrice[i],_erc721[i],_categories[i],_album[i],_desc[i]);
                     }   
 
     }
 
+    function changeServiceFee(uint256 _fee) public onlyAdmin {
+        commissionRate = _fee;  
+    }
 
-    function createSale(uint256 tokenId, uint256 _reservePrice,address _erc721) public {
-        IERC721 TERC721 = IERC721(_erc721);
+
+    function changeRoyalty(uint256 _fee) public onlyAdmin {
+        royaltyFee = _fee;
+    }
+
+
+    function createSale(uint256 tokenId, uint256 _reservePrice,address _erc721,uint256[] memory _category_album_collectible,string memory _album,string memory _desc) public {
+        ERC721 TERC721 = ERC721(_erc721);
         require(TERC721.getApproved(tokenId)==address(this),"marketplace is not authorized");
         require(TERC721.ownerOf(tokenId)==msg.sender, "Auctioner must be the owner");
         require(!auctions[_erc721][tokenId].open, "ERC721Matcha: The selected NFT already has an auction");
 
+        if(OriginalAuctioneer[_erc721][tokenId]==address(0)){
+            OriginalAuctioneer[_erc721][tokenId]=msg.sender;
+        }
 
-        Auction memory tx1 = Auction(tokenId,_erc721, payable(msg.sender),block.timestamp,new address[](0),new uint256[](0),false,_reservePrice,AuctionArrayIndexNumber,address(0),0,true);
+        address royaltyHolder = OriginalAuctioneer[_erc721][tokenId];
+
+                string memory uri = TERC721.tokenURI(tokenId);
+                string[2] memory uri_des = [uri,_desc];
+        Auction memory tx1 = Auction(tokenId,_erc721, payable(msg.sender),block.timestamp,new address[](0),new uint256[](0),false,_reservePrice,AuctionArrayIndexNumber,address(0),0,true,royaltyHolder,_category_album_collectible,uri_des,_album);
         AuctionArray.push(tx1);
         AuctionArrayIndex[_erc721][tokenId]=AuctionArrayIndexNumber;
 
@@ -681,13 +744,19 @@ contract marketPlace is IERC721Receiver, ReentrancyGuard{
         auctions[_erc721][tokenId].reserve = _reservePrice;
         auctions[_erc721][tokenId].index = AuctionArrayIndexNumber;
         auctions[_erc721][tokenId].UpForSale = true;
+        auctions[_erc721][tokenId].category_album_collectible = _category_album_collectible;
+        auctions[_erc721][tokenId].uri = uri_des;
+        auctions[_erc721][tokenId].album = _album;
+
+
         
         TERC721.safeTransferFrom(msg.sender,address(this), tokenId);
         AuctionArrayIndexNumber++;
     }
 
     
-    function bid(uint256 tokenId,address _erc721) public payable nonReentrant {
+    function bid(uint256 tokenId,address _erc721, uint256 _tvl) public nonReentrant {
+        TVL.transferFrom(msg.sender,address(this),_tvl);
         ERC721 TERC = ERC721(_erc721);
         uint256 index = AuctionArrayIndex[_erc721][tokenId];
         
@@ -699,7 +768,7 @@ contract marketPlace is IERC721Receiver, ReentrancyGuard{
 
         // approve was lost
 //        require(TERC.getApproved(tokenId) == address(this), "Cannot complete the auction");
-        require(msg.value>=AuctionArray[index].reserve, "Cannot complete the auction");
+        require(_tvl>=AuctionArray[index].reserve, "Cannot complete the auction");
 
         // Revert the call if the bidding
         // period is over.
@@ -713,15 +782,15 @@ contract marketPlace is IERC721Receiver, ReentrancyGuard{
 
         uint256  lastBid = auctions[_erc721][tokenId].highestBid.length==0 ? 0 : auctions[_erc721][tokenId].highestBid[auctions[_erc721][tokenId].highestBid.length-1];
         require(
-            msg.value > lastBid,
+            _tvl > lastBid,
             "There already is a higher bid."
         );
 
         address owner = TERC.ownerOf(tokenId);
         require(msg.sender!=owner, "ERC721Matcha: The owner cannot bid his own collectible");
-        auctions[_erc721][tokenId].highestBid.push(msg.value);
+        auctions[_erc721][tokenId].highestBid.push(_tvl);
         auctions[_erc721][tokenId].highestBidder.push(msg.sender);
-        AuctionArray[index].highestBid.push(msg.value) ;
+        AuctionArray[index].highestBid.push(_tvl) ;
         AuctionArray[index].highestBidder.push(msg.sender);        
 
 
@@ -739,7 +808,8 @@ contract marketPlace is IERC721Receiver, ReentrancyGuard{
     require(auctions[_erc721][tokenId].open,"This auctions has been ended");
 
        for(uint256 i = 0 ; i < auctions[_erc721][tokenId].highestBidder.length; i++){
-                payable(auctions[_erc721][tokenId].highestBidder[i]).transfer(auctions[_erc721][tokenId].highestBid[i]);
+                TVL.transferFrom(address(this),auctions[_erc721][tokenId].highestBidder[i],auctions[_erc721][tokenId].highestBid[i]);
+
             }
 
         
@@ -765,18 +835,24 @@ contract marketPlace is IERC721Receiver, ReentrancyGuard{
 
 
             address _highestBidder = auctions[_erc721][tokenId].highestBidder[auctions[_erc721][tokenId].highestBidder.length-1];
+            address _RoyaltyHOlder = OriginalAuctioneer[_erc721][tokenId];
 
 
             uint256 amount4admin = auctions[_erc721][tokenId].highestBid[auctions[_erc721][tokenId].highestBid.length-1] * commissionRate / 100;
 
+            uint256 amount4Royalty = auctions[_erc721][tokenId].highestBid[auctions[_erc721][tokenId].highestBid.length-1] * royaltyFee / 100;
+            
             uint256 amount4owner = auctions[_erc721][tokenId].highestBid[auctions[_erc721][tokenId].highestBid.length-1] - amount4admin;
 
             // to owner
-            payable(auctions[_erc721][tokenId].beneficiary).transfer(amount4owner);
+            TVL.transferFrom(address(this),auctions[_erc721][tokenId].beneficiary,amount4owner);
     
 
             // to admin
-            payable(admin).transfer(amount4admin);
+            TVL.transferFrom(address(this),admin,amount4admin);
+            TVL.transferFrom(address(this),_RoyaltyHOlder,amount4Royalty);
+
+
 
            ERC721 TERC = ERC721(auctions[_erc721][tokenId].tokenAdd);
            TERC.safeTransferFrom(address(this),_highestBidder,tokenId);
@@ -789,7 +865,7 @@ contract marketPlace is IERC721Receiver, ReentrancyGuard{
         auctions[_erc721][tokenId].highestBidder.pop();
 
             for(uint256 i = 0 ; i < auctions[_erc721][tokenId].highestBidder.length; i++){
-                payable(auctions[_erc721][tokenId].highestBidder[i]).transfer(auctions[_erc721][tokenId].highestBid[i]);
+              TVL.transferFrom(address(this),auctions[_erc721][tokenId].highestBidder[i],auctions[_erc721][tokenId].highestBid[i]);
             }
 
         }
@@ -814,7 +890,7 @@ contract marketPlace is IERC721Receiver, ReentrancyGuard{
            ERC721 TERC = ERC721(auctions[_erc721][tokenId].tokenAdd);
            TERC.safeTransferFrom(address(this),auctions[_erc721][tokenId].beneficiary,tokenId);
         for(uint256 i = 0 ; i < auctions[_erc721][tokenId].highestBidder.length; i++){
-                payable(auctions[_erc721][tokenId].highestBidder[i]).transfer(auctions[_erc721][tokenId].highestBid[i]);
+              TVL.transferFrom(address(this),auctions[_erc721][tokenId].highestBidder[i],auctions[_erc721][tokenId].highestBid[i]);
             }
 
         
@@ -827,15 +903,23 @@ contract marketPlace is IERC721Receiver, ReentrancyGuard{
 
     }
 
-    function purchase(uint256 tokenId,address _erc721) public payable{
+    function purchase(uint256 tokenId,address _erc721) public {
         ERC721 Token = ERC721(_erc721);
         require(auctions[_erc721][tokenId].UpForSale,"This NFT is not for sale");
         uint256 price = auctions[_erc721][tokenId].reserve;
+        address royaltyHolder = OriginalAuctioneer[_erc721][tokenId];
 
         uint256 commission = price * commissionRate /100;
-        uint256 ownersShare = price-commission;
-        payable(admin).transfer(commission);
-        payable(auctions[_erc721][tokenId].beneficiary).transfer(ownersShare);
+        uint256 royaltyShare = price * royaltyFee / 100;
+        uint256 ownersShare = price-commission-royaltyShare;
+                // to owner
+        TVL.transferFrom(address(this),auctions[_erc721][tokenId].beneficiary,ownersShare);
+
+
+        // to admin
+        TVL.transferFrom(address(this),admin,commission);
+        TVL.transferFrom(address(this),royaltyHolder,royaltyShare);
+
 
         uint256 index = AuctionArrayIndex[_erc721][tokenId];
         AuctionArray[index].UpForSale=false;

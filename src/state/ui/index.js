@@ -2,13 +2,16 @@ import { client, MarketAbi, MarketAdd, network, networkhex, q } from "../../conf
 import {Contract, ethers, providers, utils} from "ethers"
 import axios from "axios";
 import { formatEther, formatUnits } from "ethers/lib/utils.js";
+import Web3 from "web3"
 const { toChecksumAddress } = require('ethereum-checksum-address')
 const { createSlice, createAsyncThunk } = require("@reduxjs/toolkit");
+const web3 = new Web3(Web3.givenProvider)
 
 const provider = new providers.Web3Provider(window.ethereum)
 
 
 const marketContract = new Contract(MarketAdd,MarketAbi,provider);
+const marketContract2 = new web3.eth.Contract(MarketAbi,MarketAdd)
 
 
 export const dataBase = createAsyncThunk(
@@ -39,7 +42,7 @@ export const getData = createAsyncThunk(
     console.log("get Data ran",window.ethereum.networkVersion===network,window.ethereum.networkVersion,network)
     try {
       if(window.ethereum.networkVersion===network){
-        const tx1 = await marketContract.getArray()
+        const tx1 = await marketContract2.methods.getArray().call()
         console.log("network found")
         const tx2 = await client.query(
       
@@ -144,7 +147,7 @@ export const getMoralis = createAsyncThunk(
               address: item.beneficiary,
               creator: `${getName(item.beneficiary).name}`,
               currency: `${utils.formatEther(item.reserve)} BNB` ,
-              price: `$${(utils.formatEther(item.reserve) *ethprice).toFixed(3) }`,
+              price: `$${(utils.formatEther(item.reserve) *ethprice).toFixed(0) }`,
               avatar: `${getName(item.beneficiary).image }`,
               image: `${_data.data.normalized_metadata.image===null? "https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled.png" : _data.data.normalized_metadata.image}`,
               image2x: `${_data.data.normalized_metadata.image===null? "https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled.png" : _data.data.normalized_metadata.image}`,
@@ -268,7 +271,10 @@ const adoptSlice = createSlice({
       state.sortedBids = state.bids.filter(item=> Number(formatEther(item.reserve))<=Number(actions.payload[0]));
 
 
-    }
+    },
+    filterByCountry: (state,actions) =>{
+      console.log("sort bids called",actions.payload)
+      state.sortedBids = state.bids.filter(item=> item.album===actions.payload)}
   },
   extraReducers: {
     [dataBase.pending]: (state, action) => {
@@ -324,4 +330,4 @@ const adoptSlice = createSlice({
 });
 
 export const adopreducer = adoptSlice.reducer;
-export const { toggle, setTest,setBids,sortBidsAsc,filterBids,sortByPrice,filterByPrice } = adoptSlice.actions;
+export const { toggle, setTest,setBids,sortBidsAsc,filterBids,sortByPrice,filterByPrice,filterByCountry } = adoptSlice.actions;

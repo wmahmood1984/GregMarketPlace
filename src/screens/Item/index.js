@@ -12,18 +12,21 @@ import axios from "axios";
 import { formatEther, formatUnits } from "ethers/lib/utils";
 import { useSelector } from "react-redux";
 import { client, q } from "../../config.js";
+import { style } from "@mui/system";
 const navLinks = ["Info", "Owners", "History", "Bids"];
 
-const categories = [
-  {
-    category: "black",
-    content: "art",
-  },
-  {
-    category: "purple",
-    content: "unlockable",
-  },
-];
+// const categories = [
+//   {
+//     category: "black",
+//     content: "art",
+//   },
+//   {
+//     category: "purple",
+//     content: "unlockable",
+//   },
+// ];
+
+const categories = ["Adventure","Airlines","Art","Cruise","Culture","Ecotourism","Gastronomy","Honeymoon","Hotels","Luxury","Photography","Safaris","Sports","Others"];
 
 const users = [
   {
@@ -112,7 +115,7 @@ const Item = () => {
 
 
 
-   console.log("index",auctions)
+   console.log("index",data)
 // console.log("auctions",auctions)
 // console.log("data",data)
 
@@ -154,7 +157,7 @@ const setDataBase = async (account)=>{
 const getName = (add)=>{
   console.log("addr step 1",add)
   const tx1 = reduxData && reduxData.filter(item=>item[2]===add)
-  console.log("step 2 ",tx1[0][0])
+//  console.log("step 2 ",tx1[0][0])
   return  {name:tx1[0][0],email:tx1[0][1],address:tx1[0][2],image:tx1[0][3]}
 }
 
@@ -234,7 +237,7 @@ const getName = (add)=>{
 
   const Approval = async ()=>{
     try {
-      const tx1 = await TVLContract.approve(MarketAdd,utils.formatEther(bid),{gasLimit:3000000})
+      const tx1 = await TVLContract.approve(MarketAdd,utils.parseEther(bid),{gasLimit:3000000})
       await tx1.wait()
 
       if(tx1){
@@ -256,7 +259,13 @@ const getName = (add)=>{
           <div className={styles.bg}>
             <div className={styles.preview}>
               <div className={styles.categories}>
-                {categories.map((x, index) => (
+              <div
+                    className={cn("status-black",styles.category )}
+
+                  >
+                    {auctions &&  categories[auctions.category_album_collectible[0]]}
+                  </div>
+                {/* {categories.map((x, index) => (
                   <div
                     className={cn(
                       { "status-black": x.category === "black" },
@@ -267,7 +276,7 @@ const getName = (add)=>{
                   >
                     {x.content}
                   </div>
-                ))}
+                ))} */}
               </div>
               <img
                 srcSet={data && data.normalized_metadata.image}
@@ -281,23 +290,24 @@ const getName = (add)=>{
             <h1 className={cn("h3", styles.title)}>{data && data.normalized_metadata.name}</h1>
             <div className={styles.cost}>
               <div className={cn("status-stroke-green", styles.price)}>
-                {auctions && utils.formatEther(auctions.reserve) } BNB
+                {auctions && utils.formatEther(auctions.reserve) } TVL
               </div>
               <div className={cn("status-stroke-black", styles.price)}>
-                ${auctions && utils.formatEther(auctions.reserve) * 200}
+                ${auctions && utils.formatEther(auctions.reserve)}
               </div>
-              <div className={styles.counter}>10 in stock</div>
+              <div className={styles.counter}>{data && data.amount} in stock</div>
             </div>
             <div className={styles.info}>
-              This NFT Card will give you Access to Special Airdrops. To learn
-              more about UI8 please visit{" "}
-              <a
+              {/* This NFT Card will give you Access to Special Airdrops. To learn
+              more about UI8 please visit{" "} */}
+              {auctions && auctions.uri[1]}
+              {/* <a
                 href="https://ui8.net"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 https://ui8.net
-              </a>
+              </a> */}
             </div>
             <div className={styles.nav}>
               {navLinks.map((x, index) => (
@@ -313,6 +323,7 @@ const getName = (add)=>{
                 </button>
               ))}
             </div>
+            {activeIndex ==1?            
             <Users className={styles.users} items={[{
                 name: auctions && `${getName(auctions.beneficiary).name}`,
                 position: "Owner",
@@ -326,7 +337,26 @@ const getName = (add)=>{
                 avatar: auctions && `${getName(auctions.beneficiary).image}`,
 
                 address: data && `${data.minter_address}`,
-              }]} />
+              }]} />: 
+
+              activeIndex ==3 ? 
+              <div>
+              {auctions &&  auctions.highestBidder.map((v,e)=><div>
+                <div>
+                <span>Bidder</span>
+                <span>{`${v.slice(0,5)}...${v.slice(-4)}`}</span>
+                </div>
+                <div>
+                <span>Bid amount</span>
+                <span>{utils.formatEther(auctions && auctions.highestBid[e])}</span>
+                </div>
+            
+            </div>)}
+          </div> : 
+           activeIndex ==2 ? <div>No History</div>: null
+
+            }
+
             {auctions && 
             true 
             //&& auctions.open
