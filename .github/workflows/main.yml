@@ -37,7 +37,7 @@ jobs:
         cmd: sudo install --force
         
     - name: Build React App
-      run: sud yarn build
+      run:  sudo yarn build
       
        
         
