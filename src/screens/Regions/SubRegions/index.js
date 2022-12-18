@@ -41,7 +41,7 @@ function SubRegion() {
         fetchData();
     }, [subRegion]);
 
-    console.log("me yehan hoon ",location.state)
+//    console.log("me yehan hoon ",location.state)
 
     return (
         <div>

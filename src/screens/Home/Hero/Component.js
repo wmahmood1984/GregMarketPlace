@@ -9,6 +9,17 @@ import { Link } from "react-router-dom";
 import { formatEther, formatUnits } from 'ethers/lib/utils';
 
 
+async function getData (item){
+  const response = await axios.get(item.uri[0],{
+    headers: {
+      'accept': 'application/json'
+    }
+  })
+  
+  return response.data
+
+}
+
 
 
 export default function Component({item,setTokenId,setTokenAdd,setVisibleModalBid}) {
@@ -19,13 +30,15 @@ export default function Component({item,setTokenId,setTokenAdd,setVisibleModalBi
     useEffect(()=>{
       const abc = async ()=>{
         try {
-          const meta = await axios.get(item.uri[0],{
-            headers: {
-              'accept': 'application/json'
-            }
-          })
-          setURI(meta.data)
-          
+          // const meta = await axios.get(item.uri[0],{
+          //   headers: {
+          //     'accept': 'application/json'
+          //   }
+          // })
+
+
+          const res = await getData(item)
+           setURI(res)          
           const eth = await axios.get(
             "https://api.coingecko.com/api/v3/coins/binancecoin/market_chart?vs_currency=usd&days=7"
           )
@@ -40,6 +53,13 @@ export default function Component({item,setTokenId,setTokenAdd,setVisibleModalBi
       abc()
     },[item])
 
+
+
+
+
+
+
+
     const reduxData = useSelector((state) => {
 
         return state.adoptReducer.data;
@@ -53,7 +73,7 @@ export default function Component({item,setTokenId,setTokenAdd,setVisibleModalBi
       return  {name:tx1[0][0],email:tx1[0][1],address:tx1[0][2],image:tx1[0][3]}
     }
 
-    // console.log("item",item.reserve,TVLPrice)
+    console.log("URI",URI)
 
   return (reduxData&&  item && 
     <div>

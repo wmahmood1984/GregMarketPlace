@@ -25,7 +25,7 @@ import LoaderCircle from "../../../../components/LoaderCircle";
 
 const Checkout = ({purchase,setVisibleModalPurchase,purchasing,setPurchasing, className,price,balance,commission,Approval,allowance }) => {
 
-  console.log("price",commission)
+//  console.log("price",commission)
 
   const items = [
     {

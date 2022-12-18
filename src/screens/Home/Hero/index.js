@@ -102,7 +102,7 @@ const Hero = ({ subtitle, title, link }) => {
 
   const items = items2 && items2.filter(item=>item.title!=`Server error`)
 
-  console.log("items",items2)
+
 
 
   return (

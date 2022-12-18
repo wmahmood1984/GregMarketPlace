@@ -163,7 +163,7 @@ const captureFile = async(e)=>{
 });}
 }
 
-Counter && console.log("video",Counter)
+//Counter && console.log("video",Counter)
 
 
 
@@ -172,7 +172,7 @@ const upLoadNFT = async ()=>{
   setMintingLoader(true)
  
   const obj = {image:image,name,description,PriceinEth,royalties,size,sale,price,travelOffer,album:items[album].title,minter_address:account}
-  console.log("obe",obj)
+ // console.log("obe",obj)
   const jsonObj = JSON.stringify(obj)
   const jsonIPFS = await client.add(jsonObj)
   const tx = await tokenContract.Mint(account,jsonIPFS.path,

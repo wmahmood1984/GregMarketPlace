@@ -29,7 +29,7 @@ export default function Card4({item,index}) {
     
       },[])
 
-  data &&     console.log("index",data)
+//  data &&     console.log("index",data)
 
 
     return (

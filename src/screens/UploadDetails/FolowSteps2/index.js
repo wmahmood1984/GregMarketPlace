@@ -7,7 +7,7 @@ import LoaderCircle from "../../../components/LoaderCircle";
 import { minHeight } from "@mui/system";
 
 const FolowSteps = ({ className ,upLoadNFT,approval,approvalLoader,mintingDone,approvalDone,lockDone,mintingLoader,lockLoader,Lock }) => {
- console.log("data",{ className ,upLoadNFT,approval,approvalLoader,mintingDone,approvalDone,lockDone,mintingLoader,lockLoader,Lock })
+ //console.log("data",{ className ,upLoadNFT,approval,approvalLoader,mintingDone,approvalDone,lockDone,mintingLoader,lockLoader,Lock })
  
   return (
     <div className={cn(className, styles.steps)}>

@@ -39,11 +39,16 @@ export const dataBase = createAsyncThunk(
 export const getData = createAsyncThunk(
   "getData",
   async (a, thunkApi) => {
-    console.log("get Data ran",window.ethereum.networkVersion===network,window.ethereum.networkVersion,network)
+
     try {
-      if(window.ethereum.networkVersion===network){
+      // console.log("condition met1",window.ethereum.networkVersion===network)
+      // console.log("condition met2",window)
+      // console.log("condition met3",window.ethereum)
+      // console.log("condition met4",window.ethereum.networkVersion)
+      // if(window.ethereum.networkVersion===network){
+
         const tx1 = await marketContract2.methods.getArray().call()
-        console.log("network found")
+        console.log("get Data ran",tx1)
         const tx2 = await client.query(
       
           q.Paginate(
@@ -72,7 +77,7 @@ export const getData = createAsyncThunk(
         return {tx1}
   
 
-      }else {
+      // }else {
 
         try {
           window.ethereum.request({
@@ -104,7 +109,7 @@ export const getData = createAsyncThunk(
          }
        }
         return {tx1:null}
-      }
+//      }
 
 
     } catch (error) {
@@ -244,7 +249,7 @@ const adoptSlice = createSlice({
        ;
     },
     filterBids: (state,actions) =>{
-      console.log("sort bids called",actions.payload)
+//      console.log("sort bids called",actions.payload)
       if(actions.payload===0){
         state.sortedBids = state.bids
       } else {
@@ -267,13 +272,13 @@ const adoptSlice = createSlice({
 
     },
     filterByPrice: (state,actions) =>{
-      console.log("sort bids called",actions.payload)
+//      console.log("sort bids called",actions.payload)
       state.sortedBids = state.bids.filter(item=> Number(formatEther(item.reserve))<=Number(actions.payload[0]));
 
 
     },
     filterByCountry: (state,actions) =>{
-      console.log("sort bids called",actions.payload)
+ //     console.log("sort bids called",actions.payload)
       state.sortedBids = state.bids.filter(item=> item.album===actions.payload)}
   },
   extraReducers: {

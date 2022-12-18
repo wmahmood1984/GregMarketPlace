@@ -21,7 +21,7 @@ function Country() {
         autoplaySpeed: 2000
     };
 
-    console.log("sate",location.state)
+//    console.log("sate",location.state)
 
     return (
         <>

@@ -84,7 +84,7 @@ const Headers = () => {
 
    
     const setDataBase = async (account)=>{
-      console.log("account in",account)
+ //     console.log("account in",account)
       try {
         const tx1 = await client.query(
     
@@ -92,7 +92,7 @@ const Headers = () => {
             q.Match(q.Index('Account1'), `${account}`)
             ))
     
-        console.log(tx1)
+//        console.log(tx1)
       } catch (err) {
         if(account){
           setNROpen(true)
@@ -375,7 +375,7 @@ function ResponsiveDialog2({open,setOpen}) {
     reader.readAsArrayBuffer(file)
     reader.onloadend = async ()=>{
      imageBugger = Buffer(reader.result)
-      console.log("buffer",imageBugger)
+ //     console.log("buffer",imageBugger)
   clienti.add(imageBugger).then((res) => {
     setImage(`https://gateway.pinata.cloud/ipfs/${res.path}`)
  
@@ -396,7 +396,7 @@ const Register = async ()=>{
       )
       )
 
-    console.log(tx)
+//    console.log(tx)
     setOpen(false)
 
   } catch (error) {

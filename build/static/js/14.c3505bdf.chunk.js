@@ -1,2 +1,0 @@
-(this["webpackJsonptravel-coin"]=this["webpackJsonptravel-coin"]||[]).push([[14,13,15,24],{2068:function(n,c){},2074:function(n,c){},2100:function(n,c){},2101:function(n,c){},2102:function(n,c){},2103:function(n,c){}}]);
-//# sourceMappingURL=14.c3505bdf.chunk.js.map

@@ -82,7 +82,7 @@ const Item = () => {
     const abc = async()=>{
 
         const item = await marketContractR.getArray()
-        console.log("original item",item)
+     //   console.log("original item",item)
         setAuctions(item[index])
         setBid(formatEther(item[index].reserve))
         
@@ -115,7 +115,7 @@ const Item = () => {
 
 
 
-   console.log("index",data)
+//   console.log("index",data)
 // console.log("auctions",auctions)
 // console.log("data",data)
 

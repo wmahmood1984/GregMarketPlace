@@ -7,7 +7,7 @@ import Card4 from "../../../components/Card4";
 
 const Items = ({ className, items }) => {
 
-  console.log("selected",items)
+//  console.log("selected",items)
   return (
     <div className={cn(styles.items, className)}>
       <div className={styles.list}>

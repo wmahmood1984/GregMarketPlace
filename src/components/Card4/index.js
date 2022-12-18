@@ -25,11 +25,7 @@ const Card4 = ({ className, item }) => {
           }
         })
 
-        console.log("item ",item)
-        console.log("item.uri ",item.uri)
-        console.log("item.uri ",item[0].uri)
-        console.log("meta ",meta)
-        setURI(meta.data)        
+         setURI(meta.data)        
       } catch (error) {
         setURI({name:"server error", image:"server errror"})
       }

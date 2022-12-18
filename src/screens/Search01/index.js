@@ -124,7 +124,7 @@ console.log("step 2 ",tx1[0][0])
 
 
 
-console.log("array",bids)
+//console.log("array",bids)
 
 
   const handleSubmit = (e) => {

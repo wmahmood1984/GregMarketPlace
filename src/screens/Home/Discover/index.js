@@ -131,11 +131,11 @@ const filterbyPrice = (num)=>{
 const getName = (add)=>{
 //  console.log("addr step 1",add)
   const tx1 = reduxData && reduxData.filter(item=>item[2]===add)
-  console.log("step 2 ",tx1[0][0])
+ // console.log("step 2 ",tx1[0][0])
 //  return  {name:tx1[0][0],email:tx1[0][1],address:tx1[0][2],image:tx1[0][3]}
 }
 
-console.log("value",values)
+//console.log("value",values)
 
   return (
     <div className={cn("section", styles.section)}>

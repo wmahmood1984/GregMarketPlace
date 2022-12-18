@@ -77,7 +77,7 @@ const bids6 = bids2 && bids5.filter(item=> item.album.slice(0,2)===code)
 const bids = bids2 && travelOffer?  bids6.filter(item=>item.category_album_collectible[1]==1) : bids6.filter(item=>item.category_album_collectible[1]==0)
 
 
- console.log("refine in hot",bids2[0].category_album_collectible[1])
+// console.log("refine in hot",bids2[0].category_album_collectible[1])
 
 
 

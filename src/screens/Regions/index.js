@@ -40,7 +40,7 @@ function Region() {
         fetchData();
     }, [region]);
 
-    console.log("location",location.state)
+//    console.log("location",location.state)
 
     return (
         <>

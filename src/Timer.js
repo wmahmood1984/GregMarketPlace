@@ -32,7 +32,7 @@ export default function Timer({start}) {
 
   const handleUnStake = () => {};
 
-  console.log("seconds",SecondsRemaining)
+//  console.log("seconds",SecondsRemaining)
 
   return (
     <div className="flex aic jc t-c">

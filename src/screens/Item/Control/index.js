@@ -53,7 +53,7 @@ const Control = ({
   const {account} = useWeb3React()
 
   
-console.log("bidder",highestBidder)
+//console.log("bidder",highestBidder)
   const now = new Date().getTime()/1000
 
 

@@ -80,7 +80,7 @@ const Auction = () => {
   },[account,toggle])
 
 
-console.log("array",bids)
+//console.log("array",bids)
 
 
 const Filter = (num)=>{

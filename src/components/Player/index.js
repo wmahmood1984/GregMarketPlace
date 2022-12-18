@@ -13,7 +13,7 @@ const Player = ({ className, item }) => {
   useEffect(()=>{
     const abc = async ()=>{
       try {
-        console.log("first",item.uri[0])        
+//        console.log("first",item.uri[0])        
         const meta = await axios.get(item.uri[0],{
           headers: {
             'accept': 'application/json'

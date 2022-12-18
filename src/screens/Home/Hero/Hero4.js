@@ -105,7 +105,7 @@ const Hero4 = ({ subtitle, title, link,code }) => {
 
   const items = items2 && items3.filter(item=> item.album===code)
 
-  console.log("item",items3[3].album,code)
+//  console.log("item",items3[3].album,code)
 
 
   return (

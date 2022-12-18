@@ -105,7 +105,7 @@ const Hero2 = ({ subtitle, title, link,code }) => {
 
   const items = items2 && items3.filter(item=> item.album.slice(0,2) ===code)
 
-  console.log("item",items3[0].album)
+//  console.log("item",items3[0].album)
 
 
   return (

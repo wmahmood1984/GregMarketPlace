@@ -69,7 +69,7 @@ const refindArray = bids2 && bids4.sort((a, b) => a.highestBidder.length - b.hig
 
 const bids = bids3 && refindArray.reverse()
 
- console.log("refine in hot",bids)
+// console.log("refine in hot",bids)
 
 
 

@@ -42,7 +42,7 @@ const Card3 = ({Approval, className, item,Sale,commission,approvalDone,SaleDone,
   },[])
 
 // console.log("obj in card",{ className, item,Sale,commission,Check })
-console.log("check",Check,item.token_id,item.token_address)
+//console.log("check",Check,item.token_id,item.token_address)
   return (
     <div className={cn(styles.card, className)}>
         <div className={styles.preview}>

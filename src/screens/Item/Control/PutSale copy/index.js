@@ -25,7 +25,7 @@ const PutSale2 = ({saleAuction,Approval,Sale, className,setVisibleModalSale,canc
   const [country, setCountry] = useState();
   const [countryInd, setCountryInd] = useState(0);
   const [travelOffer, settravelOffer] = useState(false);
-  console.log("obje",{Sale, className,setVisibleModalSale,cancelandSaleDone,price,setPrice,commission,id,add })
+//  console.log("obje",{Sale, className,setVisibleModalSale,cancelandSaleDone,price,setPrice,commission,id,add })
 
   const subConArray = Cdata[continentInd].subMenu!=null ? Cdata[continentInd].subMenu.map((v,e)=>v.title) : []
 
