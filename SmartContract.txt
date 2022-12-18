@@ -11,6 +11,9 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contr
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Strings.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/IERC721Receiver.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/IERC721Receiver.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC1155/presets/ERC1155PresetMinterPauser.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC1155/IERC1155Receiver.sol";
+
 
 contract ReentrancyGuard {
     // counter to allow mutex lock with only one SSTORE operation
@@ -274,6 +277,12 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     function Mint(address to, string memory _data) public {
         _safeMint(to, tokenCounter, _data);
         tokenCounter++;
+    }
+
+    function BullkMint(address to, string memory _data, uint256 _num) public {
+        for(uint256 i = 0 ; i < _num ; i ++){
+            Mint(to,_data);
+        }
     }
 
     /**
@@ -559,7 +568,7 @@ interface IERC20 {
 }
 
 
-contract marketPlace is IERC721Receiver, ReentrancyGuard{
+contract marketPlace is IERC721Receiver, ReentrancyGuard  {
     using Address for address;
    
     
@@ -662,52 +671,89 @@ contract marketPlace is IERC721Receiver, ReentrancyGuard{
         AuctionArrayIndexNumber++;
     }
 
-    function createAuction2(address user,uint256 tokenId, uint _closingTime, uint256 _reservePrice,address _erc721,uint256[] memory _category_album_collectible,string memory _album,string memory _desc) public {
-        ERC721 TERC721 = ERC721(_erc721);
-        require(TERC721.getApproved(tokenId)==address(this),"marketplace is not authorized");
+
+
+    function createAuction115(uint256 tokenId, uint _closingTime, uint256 _reservePrice,address _erc721,uint256[] memory _category_album_collectible, string memory _album,string memory _desc) public {
+        ERC1155W TERC721 = ERC1155W(_erc721);
+        require(TERC721.isApprovedForAll(msg.sender,address(this)),"marketplace is not authorized");
         require(sellBidPrice[_erc721][tokenId]==0, "ERC721Matcha: The selected NFT is open for sale, cannot be auctioned");
         require(!auctions[_erc721][tokenId].open, "ERC721Matcha: The selected NFT already has an auction");
-     //   require(TERC721.ownerOf(tokenId)==user, "ERC721Matcha: Only owner can auction this item");
-                string memory uri = TERC721.tokenURI(tokenId);
-                string[2] memory uri_des = [uri,_desc];
+        require(TERC721.balanceOf(msg.sender,tokenId)>0, "ERC721Matcha: Only owner can auction this item");
+        string memory uri = TERC721.uri(tokenId);
+        string[2] memory uri_des = [uri,_desc];
         if(OriginalAuctioneer[_erc721][tokenId]==address(0)){
             OriginalAuctioneer[_erc721][tokenId]=msg.sender;
         }
 
         address royaltyHolder = OriginalAuctioneer[_erc721][tokenId];
 
-        Auction memory tx1 = Auction(tokenId,_erc721, payable(user),_closingTime,new address[](0),new uint256[](0),true,_reservePrice,AuctionArrayIndexNumber,address(0),0,false,royaltyHolder,_category_album_collectible,uri_des,_album);
+        Auction memory tx1 = Auction(tokenId,_erc721, payable(msg.sender),_closingTime,new address[](0),new uint256[](0),true,_reservePrice,AuctionArrayIndexNumber,address(0),0,false,royaltyHolder,_category_album_collectible,uri_des,_album);
         AuctionArray.push(tx1);
         AuctionArrayIndex[_erc721][tokenId]=AuctionArrayIndexNumber;
+        
 
         auctions[_erc721][tokenId].tokenId = tokenId;
         auctions[_erc721][tokenId].tokenAdd = _erc721;
-        auctions[_erc721][tokenId].beneficiary = payable(user);
+        auctions[_erc721][tokenId].beneficiary = payable(msg.sender);
         auctions[_erc721][tokenId].auctionEnd = _closingTime;
         auctions[_erc721][tokenId].reserve = _reservePrice;
         auctions[_erc721][tokenId].index = AuctionArrayIndexNumber;
         auctions[_erc721][tokenId].open = true;
         auctions[_erc721][tokenId].category_album_collectible = _category_album_collectible;
         auctions[_erc721][tokenId].uri = uri_des;
-        auctions[_erc721][tokenId].album = _album;        
+        auctions[_erc721][tokenId].album = _album;
+ 
 
-        TERC721.safeTransferFrom(user,address(this), tokenId);
+        TERC721.safeTransferFrom(msg.sender,address(this), tokenId,1,bytes(""));
         AuctionArrayIndexNumber++;
     }
 
+    // function createAuction2(address user,uint256 tokenId, uint _closingTime, uint256 _reservePrice,address _erc721,uint256[] memory _category_album_collectible,string memory _album,string memory _desc) public {
+    //     ERC721 TERC721 = ERC721(_erc721);
+    //     require(TERC721.getApproved(tokenId)==address(this),"marketplace is not authorized");
+    //     require(sellBidPrice[_erc721][tokenId]==0, "ERC721Matcha: The selected NFT is open for sale, cannot be auctioned");
+    //     require(!auctions[_erc721][tokenId].open, "ERC721Matcha: The selected NFT already has an auction");
+    //  //   require(TERC721.ownerOf(tokenId)==user, "ERC721Matcha: Only owner can auction this item");
+    //             string memory uri = TERC721.tokenURI(tokenId);
+    //             string[2] memory uri_des = [uri,_desc];
+    //     if(OriginalAuctioneer[_erc721][tokenId]==address(0)){
+    //         OriginalAuctioneer[_erc721][tokenId]=msg.sender;
+    //     }
 
-    function createAuctionBulk(address[] memory _users, 
-             uint256[] memory tokenId, 
-            uint[] memory _closingTime, 
-            uint256[] memory _reservePrice,
-                address[] memory _erc721,uint256[][] memory _categories, string[] memory _album, string[] memory _desc) public {
+    //     address royaltyHolder = OriginalAuctioneer[_erc721][tokenId];
+
+    //     Auction memory tx1 = Auction(tokenId,_erc721, payable(user),_closingTime,new address[](0),new uint256[](0),true,_reservePrice,AuctionArrayIndexNumber,address(0),0,false,royaltyHolder,_category_album_collectible,uri_des,_album);
+    //     AuctionArray.push(tx1);
+    //     AuctionArrayIndex[_erc721][tokenId]=AuctionArrayIndexNumber;
+
+    //     auctions[_erc721][tokenId].tokenId = tokenId;
+    //     auctions[_erc721][tokenId].tokenAdd = _erc721;
+    //     auctions[_erc721][tokenId].beneficiary = payable(user);
+    //     auctions[_erc721][tokenId].auctionEnd = _closingTime;
+    //     auctions[_erc721][tokenId].reserve = _reservePrice;
+    //     auctions[_erc721][tokenId].index = AuctionArrayIndexNumber;
+    //     auctions[_erc721][tokenId].open = true;
+    //     auctions[_erc721][tokenId].category_album_collectible = _category_album_collectible;
+    //     auctions[_erc721][tokenId].uri = uri_des;
+    //     auctions[_erc721][tokenId].album = _album;        
+
+    //     TERC721.safeTransferFrom(user,address(this), tokenId);
+    //     AuctionArrayIndexNumber++;
+    // }
+
+
+    // function createAuctionBulk(address[] memory _users, 
+    //          uint256[] memory tokenId, 
+    //         uint[] memory _closingTime, 
+    //         uint256[] memory _reservePrice,
+    //             address[] memory _erc721,uint256[][] memory _categories, string[] memory _album, string[] memory _desc) public {
 
  
-                 for(uint256 i = 0 ; i < _users.length; i++){
-                    createAuction2(_users[i],tokenId[i],_closingTime[i], _reservePrice[i],_erc721[i],_categories[i],_album[i],_desc[i]);
-                    }   
+    //              for(uint256 i = 0 ; i < _users.length; i++){
+    //                 createAuction2(_users[i],tokenId[i],_closingTime[i], _reservePrice[i],_erc721[i],_categories[i],_album[i],_desc[i]);
+    //                 }   
 
-    }
+    // }
 
     function changeServiceFee(uint256 _fee) public onlyAdmin {
         commissionRate = _fee;  
@@ -751,6 +797,42 @@ contract marketPlace is IERC721Receiver, ReentrancyGuard{
 
         
         TERC721.safeTransferFrom(msg.sender,address(this), tokenId);
+        AuctionArrayIndexNumber++;
+    }
+
+
+    function createSale1155(uint256 tokenId, uint256 _reservePrice,address _erc721,uint256[] memory _category_album_collectible,string memory _album,string memory _desc) public {
+        ERC1155W TERC721 = ERC1155W(_erc721);
+        require(TERC721.isApprovedForAll(msg.sender,address(this)),"marketplace is not authorized");
+        require(TERC721.balanceOf(msg.sender,tokenId)>0, "Auctioner must be the owner");
+        require(!auctions[_erc721][tokenId].open, "ERC721Matcha: The selected NFT already has an auction");
+
+        if(OriginalAuctioneer[_erc721][tokenId]==address(0)){
+            OriginalAuctioneer[_erc721][tokenId]=msg.sender;
+        }
+
+        address royaltyHolder = OriginalAuctioneer[_erc721][tokenId];
+
+                string memory uri = TERC721.uri(tokenId);
+                string[2] memory uri_des = [uri,_desc];
+        Auction memory tx1 = Auction(tokenId,_erc721, payable(msg.sender),block.timestamp,new address[](0),new uint256[](0),false,_reservePrice,AuctionArrayIndexNumber,address(0),0,true,royaltyHolder,_category_album_collectible,uri_des,_album);
+        AuctionArray.push(tx1);
+        AuctionArrayIndex[_erc721][tokenId]=AuctionArrayIndexNumber;
+
+        auctions[_erc721][tokenId].tokenId = tokenId;
+        auctions[_erc721][tokenId].tokenAdd = _erc721;
+        auctions[_erc721][tokenId].beneficiary = payable(msg.sender);
+        auctions[_erc721][tokenId].auctionEnd = block.timestamp;
+        auctions[_erc721][tokenId].reserve = _reservePrice;
+        auctions[_erc721][tokenId].index = AuctionArrayIndexNumber;
+        auctions[_erc721][tokenId].UpForSale = true;
+        auctions[_erc721][tokenId].category_album_collectible = _category_album_collectible;
+        auctions[_erc721][tokenId].uri = uri_des;
+        auctions[_erc721][tokenId].album = _album;
+
+
+        
+        TERC721.safeTransferFrom(msg.sender,address(this),1, tokenId,bytes(""));
         AuctionArrayIndexNumber++;
     }
 
@@ -951,6 +1033,31 @@ contract marketPlace is IERC721Receiver, ReentrancyGuard{
         return this.onERC721Received.selector;
     }
 
+
+    function onERC1155Received(
+        address operator,
+        address from,
+        uint256 id,
+        uint256 value,
+        bytes calldata data
+    ) external  returns (bytes4){
+        return this.onERC1155Received.selector;
+    }
+
+
+    function onERC1155BatchReceived(
+        address operator,
+        address from,
+        uint256[] calldata ids,
+        uint256[] calldata values,
+        bytes calldata data
+    ) external returns (bytes4){
+        return this.onERC1155BatchReceived.selector;
+    }
+
+    function supportsInterface(bytes4 interfaceId) external view returns (bool){}
+
+
     function getArray() public view returns (Auction[] memory){
         return AuctionArray;
     }
@@ -962,3 +1069,60 @@ contract marketPlace is IERC721Receiver, ReentrancyGuard{
 
 
 
+
+
+
+
+contract ERC1155W is ERC1155PresetMinterPauser {
+
+    constructor() ERC1155PresetMinterPauser(""){
+        admin = msg.sender;
+    }
+
+    uint256 public tokenCounter;
+
+    struct NFTStruct {
+         uint counter;
+         string data;
+     }
+
+     mapping(address=>NFTStruct[]) public usersTokens;
+     mapping(uint256=>NFTStruct) public counterStruct;
+     address public admin;
+
+
+
+
+
+     function MintW(
+        address to,
+
+        uint256 amount,
+        string memory data
+    ) public  {
+//        require(hasRole(MINTER_ROLE, _msgSender()), "ERC1155PresetMinterPauser: must have minter role to mint");
+
+        _mint(to, tokenCounter, amount, bytes(""));
+        NFTStruct memory tx1 = NFTStruct(tokenCounter,data);
+        usersTokens[msg.sender].push(tx1);
+        counterStruct[tokenCounter] = tx1;
+        tokenCounter++;
+    }
+
+    string public baseUri = "https://gateway.pinata.cloud/ipfs/";
+
+    function adduri(string memory _uri) public {
+        require(msg.sender== admin, "you are not allowed");
+        baseUri = _uri;       
+    }
+
+
+     function uri(uint256 tokenId) public view virtual override returns (string memory) {
+        NFTStruct memory tx1 = counterStruct[tokenId];
+    
+        return bytes(baseUri).length > 0 ? string(abi.encodePacked(baseUri, tx1.data)) : "";
+    }
+
+
+
+}
