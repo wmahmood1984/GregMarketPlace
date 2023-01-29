@@ -10,6 +10,8 @@ import { MarketAbi, MarketAdd } from "../../../config";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setBids } from "../../../state/ui";
+import { formatEther } from "ethers/lib/utils";
+import { toChecksumAddress } from "ethereum-checksum-address";
 
 // const items = [
 //   {
@@ -83,21 +85,30 @@ const users = [
 
 const Selection = () => {
 
-  const items2 = useSelector((state) => {
+  const items = useSelector((state) => {
     return state.adoptReducer.moralisData;
   });
 
-  const items = items2 && items2.filter(item=>item.title!=`Server error`)
+//  const items = items2 && items2.filter(item=>item.title!=`Server error`)
 
 
-  const items4 = items2 && items.slice(1,4)
+  const items4 = items && items.slice(1,4)
 
-  const users = useSelector((state) => {
+  const data = useSelector((state) => {
     return state.adoptReducer.data;
   });
 
+  const getName = (add)=>{
+
+    const tx1 = data.filter(item=> toChecksumAddress(item[2])===toChecksumAddress(add))
+  //      console.log("getName",tx1)  
+    return  {name:tx1[0][0],email:tx1[0][1],address:tx1[0][2],image:tx1[0][3]}
+  }
+
+
+
 // console.log("items",items)
-  return (
+  return (data && 
     <div className={cn("section-pb", styles.section)}>
       <div className={cn("container", styles.container)}>
         <div className={styles.row}>
@@ -108,24 +119,24 @@ const Selection = () => {
                   <Link className={styles.card} to={`/item/${x.index}`} key={index}>
                     <div className={styles.preview}>
                       <img
-                        srcSet={`${x.image2x} 2x`}
-                        src={x.image}
+                        srcSet={`${x.uri[1]} 2x`}
+                        src={x.uri[1]}
                         alt="Selection"
                       />
                     </div>
                     <div className={styles.head}>
                       <div className={styles.line}>
                         <div className={styles.avatar}>
-                          <img src={x.avatar} alt="Avatar" />
+                          <img src={getName(x.beneficiary).image} alt="Avatar" />
                         </div>
                         <div className={styles.description}>
-                          <div className={styles.title}>{x.title}</div>
+                          <div className={styles.title}>{x.uri[2]}</div>
                           <div className={styles.counter}>{x.tokenId}</div>
                         </div>
                       </div>
                       <div className={styles.box}>
-                        <div className={styles.content}>Content upSupported</div>
-                        <div className={styles.price}>{x.price}</div>
+                        <div className={styles.content}>{x.category_album_collectible[3]?x.category_album_collectible[3]:1} in stock</div>
+                        <div className={styles.price}>{formatEther(x.reserve)}{" "}TVL {" "} / <span>{formatEther(x.reserve)}{" "}BUSD</span></div>
                       </div>
                     </div>
                   </Link>
@@ -139,19 +150,19 @@ const Selection = () => {
                   <Link className={styles.item} to={`/item/${x.index}`} key={index}>
                     <div className={styles.preview}>
                       <img
-                        srcSet={`${x.image2x} 2x`}
-                        src={x.image}
+                        srcSet={`${x.uri[1]} 2x`}
+                        src={x.uri[1]}
                         alt="Selection"
                       />
                     </div>
                     <div className={styles.description}>
-                      <div className={styles.title}>{x.title}</div>
+                      <div className={styles.title}>{x.uri[2]}</div>
                       <div className={styles.line}>
                         <div className={styles.avatar}>
-                          <img src={x.avatar} alt="Avatar" />
+                          <img src={getName(x.beneficiary).image} alt="Avatar" />
                         </div>
-                        <div className={styles.price}>{x.price}</div>
-                        <div className={styles.content}>Content unSupported</div>
+                        <div className={styles.price}>{formatEther(x.reserve)}{" "}TVL {" "} / <span>{formatEther(x.reserve)}{" "}BUSD</span></div>
+                        <div className={styles.content}>{x.category_album_collectible[3]?x.category_album_collectible[3]:1} in stock</div>
                       </div>
                       <button
                         className={cn(

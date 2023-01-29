@@ -14,12 +14,13 @@ import { useWeb3React } from "@web3-react/core";
 import Card2 from "../../components/Card2";
 import { useDispatch, useSelector } from "react-redux";
 import Card4 from "../../components/Card4";
+import { formatEther } from "ethers/lib/utils";
 
 const navLinks = ["All items", "Adventure","Airlines","Art","Cruise","Culture","Ecotourism","Gastronomy","Honeymoon","Hotels","Luxury","Photography","Safaris","Sports","Others"];
 
 const dateOptions = ["Newest", "Oldest"];
 const likesOptions = ["Most liked", "Least liked"];
-const colorOptions = combinedCountries.map((v,e)=>v.country);
+const countryOptions = combinedCountries.map((v,e)=>v.country);
 const creatorOptions = ["Verified only", "All", "Most liked"];
 
 
@@ -36,12 +37,12 @@ const Search = () => {
   const [category, setCategory] = useState(navLinks[0]);
   const [date, setDate] = useState(dateOptions[0]);
   const [likes, setLikes] = useState(likesOptions[0]);
-  const [color, setColor] = useState(colorOptions[0]);
+  const [color, setColor] = useState(countryOptions[0]);
   const [creator, setCreator] = useState(creatorOptions[0]);
   const { account,library,chainId } = useWeb3React();
   const [search, setSearch] = useState("");
  // const [bids, setAuctions] = useState("");
-  const [values, setValues] = useState([0.0001]);
+ const [values, setValues] = useState([1]);
   const dispatch = useDispatch()
   const marketContract = getContract(library, account,MarketAdd,MarketAbi);
 
@@ -58,13 +59,36 @@ const Search = () => {
   // },[account])
 
 
-  const bids2 = useSelector((state) => {
+  const bids = useSelector((state) => {
     return state.adoptReducer.sortedBids;
   });
 
+  const moralis = useSelector((state) => {
+    return state.adoptReducer.moralisData;
+  });
 
+//   const bids = bids2 && bids2.filter(item=>item.title!=`Server error`) 
 
-   const bids = bids2 && bids2.filter(item=>item.title!=`Server error`) 
+function Max (arr){
+  var max = 0
+  var index = 0
+  for(var i in arr){
+      if(arr[i]>max){
+          max = arr[i]
+          index = i;
+      }
+  }
+
+  return max
+}
+
+//  const bids = bids2 && bids2.filter(item=>item.title!=`Server error`)
+ 
+ const highestAmount = bids && Max(bids.map((v,e)=>Number(formatEther(v.reserve)) ))
+
+ const STEP = 1;
+ const MIN = 0;
+ const MAX = bids ?  highestAmount : 18;
 
 
    const Sort = (num)=>{
@@ -78,18 +102,16 @@ const Search = () => {
 
 const Filter = (num)=>{
   setCategory(num)
-  dispatch(filterBids(navLinks.indexOf(num)))
+  dispatch(filterBids({num:navLinks.indexOf(num),data:moralis}))
 }
 
 
 const FilterbyCountry = (num)=>{
   setColor(num)
-  dispatch(filterByCountry(combinedCountries[colorOptions.indexOf(num)].code))
+  dispatch(filterByCountry({code:combinedCountries[countryOptions.indexOf(num)].code,data:moralis} ))
 }
 
-const bids7 = useSelector((state) => {
-  return state.adoptReducer.bids;
-});
+
 
 // const sortbyPrice = (num)=>{
 // setPrice(num)
@@ -98,7 +120,7 @@ const bids7 = useSelector((state) => {
 
 const filterbyPrice = (num)=>{
 
-dispatch(filterByPrice(num))
+  dispatch(filterByPrice(num))
 }
 
 
@@ -118,22 +140,19 @@ const reduxData = useSelector((state) => {
 const getName = (add)=>{
 //  console.log("addr step 1",add)
 const tx1 = reduxData && reduxData.filter(item=>item[2]===add)
-console.log("step 2 ",tx1[0][0])
+//console.log("step 2 ",tx1[0][0])
 //  return  {name:tx1[0][0],email:tx1[0][1],address:tx1[0][2],image:tx1[0][3]}
 }
 
 
 
-//console.log("array",bids)
+console.log("array",bids)
 
 
   const handleSubmit = (e) => {
     alert();
   };
 
-  const STEP = 0.0001;
-  const MIN = 0.0001;
-  const MAX = 0.0005;
 
   return (
     <div className={cn("section-pt80", styles.section)}>
@@ -194,7 +213,7 @@ console.log("step 2 ",tx1[0][0])
         </div>
         <div className={styles.row}>
           <div className={styles.filters}>
-            <div className={styles.range}>
+          <div className={styles.cell}>
               <div className={styles.label}>Price range</div>
               <Range
                 values={values}
@@ -213,7 +232,7 @@ console.log("step 2 ",tx1[0][0])
                     onTouchStart={props.onTouchStart}
                     style={{
                       ...props.style,
-                      height: "36px",
+                      height: "27px",
                       display: "flex",
                       width: "100%",
                     }}
@@ -272,7 +291,7 @@ console.log("step 2 ",tx1[0][0])
                 )}
               />
               <div className={styles.scale}>
-              <div className={styles.number}>{MIN} TVL</div>
+                <div className={styles.number}>{MIN} TVL</div>
                 <div className={styles.number}>{MAX} TVL</div>
               </div>
             </div>
@@ -293,7 +312,7 @@ console.log("step 2 ",tx1[0][0])
                   className={styles.dropdown}
                   value={color}
                   setValue={FilterbyCountry}
-                  options={colorOptions}
+                  options={countryOptions}
                   setInd={()=>{}}
                 />
               </div>

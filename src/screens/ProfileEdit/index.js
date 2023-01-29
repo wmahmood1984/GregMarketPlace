@@ -4,7 +4,17 @@ import styles from "./ProfileEdit.module.sass";
 import Control from "../../components/Control";
 import TextInput from "../../components/TextInput";
 import TextArea from "../../components/TextArea";
-import { TravelCoinContext } from '../../context/TravelCoinContext'
+import { useLocation } from "react-router";
+import { useState } from "react";
+import { client, q } from "../../config";
+import { useWeb3React } from "@web3-react/core";
+const ipfsClient = require('ipfs-http-client');
+const projectId = '2HdKrtd8GBGyqmO0u1BW2Re1hSK';
+const projectSecret = '624bcf5bf92747f385771188371089f4';
+const auth =
+    'Basic ' + Buffer.from(projectId + ':' + projectSecret).toString('base64');
+
+//import { TravelCoinContext } from '../../context/TravelCoinContext'
 
 const breadcrumbs = [
   {
@@ -17,17 +27,79 @@ const breadcrumbs = [
 ];
 
 const ProfileEdit = () => {
-  const {
-    handleSetUserDetails,
-    displayName,
-    setDisplayName,
-    bio,
-    setBio,
-    website,
-    setWebsite,
-    twitter,
-    setTwitter,
-  } = useContext(TravelCoinContext)
+  const { account,library,chainId } = useWeb3React();
+  const [open, setOpen] = useState(false);
+  let location = useLocation();
+  const [name,setName] = useState(location.state[0])
+  const [email,setemail] = useState(location.state[1])
+  const [image,setImage] = useState(location.state[3])
+  const [bio,setBio] = useState(location.state[4])
+  const [twitter,setTwitter] = useState(location.state[5])
+
+  
+  const   handleSetUserDetails = null
+
+
+
+
+
+
+    var imageBugger;
+    const clienti = ipfsClient.create({
+      host: 'ipfs.infura.io',
+      port: 5001,
+      protocol: 'https',
+      headers: {
+          authorization: auth,
+      },
+   });
+  
+
+
+    const captureFile = async(e)=>{
+      e.preventDefault()
+    const file = e.target.files[0]
+    const reader = new window.FileReader()
+    reader.readAsArrayBuffer(file)
+    reader.onloadend = async ()=>{
+     imageBugger = Buffer(reader.result)
+ //     console.log("buffer",imageBugger)
+  clienti.add(imageBugger).then((res) => {
+    setImage(`https://gateway.pinata.cloud/ipfs/${res.path}`)
+ 
+ });}
+ }
+ 
+const Register = async ()=>{
+  setOpen(true)  
+  try {
+    const tx = await  client.query(
+      q.Update(
+        q.Ref(q.Collection('TravelCoin'),`${location.state[6].value.id}`),
+        {
+          data: {
+            name,email,image,account,bio,twitter
+                },
+        },
+      )
+      )
+
+    console.log(tx)
+    if(tx){
+      window.alert("Profile Updated Succesfully")
+    }
+    setOpen(false)
+
+  } catch (error) {
+    console.log(error)
+  }
+
+
+  
+}
+  
+
+  console.log("true",location.state)
 
   return (
     <div className={styles.page}>
@@ -46,7 +118,7 @@ const ProfileEdit = () => {
             <div className={styles.col}>
               <div className={styles.user}>
                 <div className={styles.avatar}>
-                  <img src="/images/content/avatar-1.jpg" alt="Avatar" />
+                  <img src={image && image} alt="Avatar" />
                 </div>
                 <div className={styles.details}>
                   <div className={styles.stage}>Profile photo</div>
@@ -58,6 +130,7 @@ const ProfileEdit = () => {
                   </div>
                   <div className={styles.file}>
                     <button
+                      onClick={captureFile}
                       className={cn(
                         "button-stroke button-small",
                         styles.button
@@ -81,8 +154,8 @@ const ProfileEdit = () => {
                       name="Name"
                       type="text"
                       placeholder="Enter your display name"
-                      value={displayName}
-                      onChange={e => setDisplayName(e.target.value)}
+                      value={name}
+                      onChange={e => setName(e.target.value)}
                       required
                     />
                     <TextArea
@@ -101,12 +174,12 @@ const ProfileEdit = () => {
                   <div className={styles.fieldset}>
                     <TextInput
                       className={styles.field}
-                      label="portfolio or website"
+                      label="portfolio or email"
                       name="Portfolio"
                       type="text"
                       placeholder="Enter URL"
-                      value={website}
-                      onChange={e => setWebsite(e.target.value)}
+                      value={email}
+                      onChange={e => setemail(e.target.value)}
                       required
                     />
                     <div className={styles.box}>
@@ -129,7 +202,7 @@ const ProfileEdit = () => {
                 wallet. Click 'Update profile' then sign the message
               </div>
               <div className={styles.btns}>
-                <button className={cn("button", styles.button)} onClick={handleSetUserDetails}>
+                <button className={cn("button", styles.button)} onClick={Register}>
                   Update Profile
                 </button>
               </div>

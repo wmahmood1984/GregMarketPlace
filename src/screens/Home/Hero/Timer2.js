@@ -25,7 +25,7 @@ export default function Timer2({styles,start}) {
 
     interval = setInterval(() => {
       setSeconds((seconds) => seconds + 1);
-    }, 60000);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [seconds]);
@@ -37,7 +37,7 @@ export default function Timer2({styles,start}) {
   return (
     <div className="flex aic jc t-c">
       {differenceTimeinSeconds>0 ? (
-        <div>
+        <div style={{marginLeft:"50px"}}>
           <div className={styles.info}>Auction ending in</div>
           <div className={styles.timer}>
         <div className={styles.box}>
@@ -56,7 +56,7 @@ export default function Timer2({styles,start}) {
         </div>
  
       ) : (
-        <strong className={styles.number}>
+        <strong style={{marginLeft:"50px"}} className={styles.number}>
             Auction ended
         </strong>
       )}

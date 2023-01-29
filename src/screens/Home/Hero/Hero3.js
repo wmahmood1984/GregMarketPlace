@@ -98,14 +98,14 @@ const Hero3 = ({ subtitle, title, link,code }) => {
   })  ;
 
   const items2 = useSelector((state) => {
-    return state.adoptReducer.bids;
+    return state.adoptReducer.moraliData;
   });
 
   const items3 = items2 && items2.filter(item=>item.title!=`Server error`)
 
   const items = items2 && items3.filter(item=> item.album.slice(0,4)===code)
 
-//  console.log("item",items3)
+  console.log("item",items)
 
 
   return (

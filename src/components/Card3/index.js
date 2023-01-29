@@ -75,7 +75,7 @@ const Card3 = ({Approval, className, item,Sale,commission,approvalDone,SaleDone,
             variant="outlined"
             disabled={false}
             onClick={() => setVisibleModal(true)}
-           >Put on Acution
+           >Put on Auction
 
             </Button>
             </div>

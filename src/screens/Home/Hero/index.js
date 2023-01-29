@@ -14,6 +14,9 @@ import { getData } from "../../../state/ui";
 import { useWeb3React } from "@web3-react/core";
 import Bid from "../../../components/Bid";
 import Component from "./Component";
+import { Contract, utils } from "ethers";
+import { ERC20, IERC20, MarketAdd } from "../../../config";
+import { formatEther } from "ethers/lib/utils";
 // import Bid from "../../../components/Bid";
 
 // const items = [
@@ -59,17 +62,34 @@ const SlickArrow = ({ currentSlide, slideCount, children, ...props }) => (
   <button {...props}>{children}</button>
 );
 
+
+export const getContract = (library, account,add,abi) => {
+	const signer = library?.getSigner(account).connectUnchecked();
+	var contract = new Contract(add,abi, signer);
+	return contract;
+};
+
 const Hero = ({ subtitle, title, link }) => {
   const [tokenId,setTokenId] = useState()
   const [tokenAdd,setTokenAdd] = useState()
-  const {account} = useWeb3React()
+  const [allowance,setAllowance] = useState()
+  const [bid,setBid] = useState()
+  const {account,library} = useWeb3React()
   const dispatch = useDispatch()
+  const [toggle,setToggle] = useState()
+
+  const TVLContract = getContract(library,account, ERC20,IERC20)
 
 
-  var toggle = false;
-  const setToggle = (bool)=>{
-    dispatch(getData({}))
-  }
+ 
+
+  useEffect(()=>{
+    const abc = async ()=>{
+      const _all = await TVLContract.allowance(account,MarketAdd)
+      setAllowance(formatEther(_all))
+    }
+    abc()
+  },[toggle])
     
     
   const settings = {
@@ -96,13 +116,30 @@ const Hero = ({ subtitle, title, link }) => {
     return state.adoptReducer.data;
   })  ;
 
-  const items2 = useSelector((state) => {
-    return state.adoptReducer.bids;
+  const items = useSelector((state) => {
+    return state.adoptReducer.moralisData;
   });
 
-  const items = items2 && items2.filter(item=>item.title!=`Server error`)
+//  const items = items2 && items2.filter(item=>item.title!=`Server error`)
 
 
+
+
+
+
+const Approval = async ()=>{
+  try {
+    const tx1 = await TVLContract.approve(MarketAdd,utils.parseEther(bid),{gasLimit:3000000})
+    await tx1.wait()
+
+    if(tx1){
+      setToggle(!toggle)
+    }
+    
+  } catch (error) {
+    console.log(error)
+  }
+}
 
 
   return (
@@ -126,7 +163,7 @@ const Hero = ({ subtitle, title, link }) => {
           <div className={styles.wrapper}>
             <Slider className="creative-slider" {...settings}>
               {items &&  items.map((x, index) => {
-
+                  
               return (
                 <div className={styles.slide} key={index}>
                   <div className={styles.row}>
@@ -153,15 +190,19 @@ const Hero = ({ subtitle, title, link }) => {
       >
          {!account? 
         <Connect/> 
-        :  null}
-        
-        <Bid 
+        :  <Bid 
         tokenId={tokenId}
         AddressOfToken={tokenAdd}
         setVisibleModalBid={setVisibleModalBid}
         toggle={toggle}
         setToggle={setToggle}
-        />
+        setBid={setBid}
+        bid={bid}
+        Approval={Approval}
+        allowance={allowance}
+        />}
+        
+        
       </Modal>
     </>
   );

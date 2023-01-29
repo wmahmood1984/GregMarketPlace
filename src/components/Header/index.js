@@ -43,21 +43,18 @@ const nav = [
   //   url: "/item",
   //   title: "Create item",
   // },
-  // {
-  //   url: "/profile",
-  //   title: "Profile",
-  // },
+  {
+    url: "/swap",
+    title: "Swap",
+  },
   {
     url: "/search01",
     title: "Buy",
   },
-  {
-    url: "/sell",
-    title: "Sell",
-  },
+
   {
     url: "/auction",
-    title: "Auction",
+    title: "Auction / Sell",
   }
 ];
 
@@ -89,7 +86,7 @@ const Headers = () => {
         const tx1 = await client.query(
     
             q.Get(
-            q.Match(q.Index('Account1'), `${account}`)
+            q.Match(q.Index('Address6'), `${account}`)
             ))
     
 //        console.log(tx1)
@@ -118,39 +115,58 @@ const Headers = () => {
       return state.adoptReducer.moralisData;
     });
 
+    const web3 = useSelector((state) => {
+      return state.adoptReducer.web3;
+    });
+
+    // if (window.ethereum?.networkVersion !== "97") {
+    //   try {
+    //     window.ethereum.request({
+    //       method: "wallet_switchEthereumChain",
+    //       params: [{ chainId: web3.utils.toHex("97") }],
+    //     });
+    //   } catch (err) {
+    //     // This error code indicates that the chain has not been added to MetaMask
+    //     if (err.code === 4902) {
+    //       // await window.ethereum.request({
+    //       //   method: 'wallet_addEthereumChain',
+    //       //   params: [
+    //       //     {
+    //       //       chainName: 'Polygon Mainnet',
+    //       //       chainId: web3.utils.toHex(chainId),
+    //       //       nativeCurrency: { name: 'MATIC', decimals: 18, symbol: 'MATIC' },
+    //       //       rpcUrls: ['https://polygon-rpc.com/']
+    //       //     }
+    //       //   ]
+    //       // });
+    //       window.alert("This chain is not configured in your metamask"
+    //       // , {
+    //       //   type: "failure",
+    //       //   position: toast.POSITION.BOTTOM_CENTER,
+    //       //   closeOnClick: true,
+    //       // }
+    //       );
+    //     }
+    //   }
+    // }
 
 
 
-    if (window.ethereum.networkVersion != "97") {
-      try {
-         window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: ethers.utils.toHex(97) }]
+    if(window.ethereum.networkVersion!=="97"){
+       try {
+                window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: "0x61" }],
         });
-      } catch (err) {
-          // This error code indicates that the chain has not been added to MetaMask
-        if (err.code === 4902) {
-          window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [
-              {
-                chainName: 'BSC Mainnet',
-                chainId: ethers.utils.toHex(97),
-                nativeCurrency: { name: 'TBNB', decimals: 18, symbol: 'BNB' },
-                rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545']
-              }
-            ]
-          });
-          window.alert("This chain is not configured in your metamask"
-          // ,{
-          //   type: "failure",
-          //   position: toast.POSITION.BOTTOM_CENTER,
-          //   closeOnClick: true,
-          //   }
-            )
-        }
-      }
+       } catch (error) {
+        console.log("Error",error)
+       }
     }
+
+
+
+
+
 
   return (
     <header className={styles.header}>
@@ -168,6 +184,7 @@ const Headers = () => {
           <nav className={styles.nav}>
             {nav.map((x, index) => (
               <Link
+                style={{fontSize:"16px"}}
                 className="ml-8 leading-10 text-[#777E90] active:text-[#ffffff]"
                 to={x.url}
                 key={index}

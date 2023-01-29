@@ -118,7 +118,7 @@ const data = [
 
                     <div className='px-5 group' key={index}>
 
-                        <Link to={{pathname:x.url, state:x.code} }  className='leading-10 pr-2 text-[#777E90] hover:text-[#afafaf] active:text-[#ffffff]'>
+                        <Link style={{fontSize:"16px"}} to={{pathname:x.url, state:x.code} }  className='leading-10 pr-2 text-[#777E90] hover:text-[#afafaf] active:text-[#ffffff]'>
                             {x.title}
                         </Link>
 

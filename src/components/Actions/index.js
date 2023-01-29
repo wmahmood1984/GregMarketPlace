@@ -9,34 +9,35 @@ import Report from "../Report";
 import Icon from "../Icon";
 import Modal from "../../components/Modal";
 
-const Actions = ({ className }) => {
+const Actions = ({ className,cancelAuction,changePrice }) => {
   const [visible, setVisible] = useState(false);
   const [visibleModalTransfer, setVisibleModalTransfer] = useState(false);
   const [visibleModalRemoveSale, setVisibleModalRemoveSale] = useState(false);
   const [visibleModalBurn, setVisibleModalBurn] = useState(false);
   const [visibleModalReport, setVisibleModalReport] = useState(false);
+ 
 
   const items = [
     {
       title: "Change price",
       icon: "coin",
-      action: () => console.log("coin"),
-    },
-    {
-      title: "Transfer token",
-      icon: "arrow-right-square",
       action: () => setVisibleModalTransfer(true),
     },
+    // {
+    //   title: "Transfer token",
+    //   icon: "arrow-right-square",
+    //   action: () => setVisibleModalTransfer(true),
+    // },
     {
       title: "Remove from sale",
       icon: "close-circle",
       action: () => setVisibleModalRemoveSale(true),
     },
-    {
-      title: "Burn token",
-      icon: "close-circle",
-      action: () => setVisibleModalBurn(true),
-    },
+    // {
+    //   title: "Burn token",
+    //   icon: "close-circle",
+    //   action: () => setVisibleModalBurn(true),
+    // },
     {
       title: "Report",
       icon: "info-circle",
@@ -72,13 +73,13 @@ const Actions = ({ className }) => {
         visible={visibleModalTransfer}
         onClose={() => setVisibleModalTransfer(false)}
       >
-        <Transfer />
+        <Transfer changePrice={changePrice} />
       </Modal>
       <Modal
         visible={visibleModalRemoveSale}
         onClose={() => setVisibleModalRemoveSale(false)}
       >
-        <RemoveSale />
+        <RemoveSale cancelAuction={cancelAuction} />
       </Modal>
       <Modal
         visible={visibleModalBurn}

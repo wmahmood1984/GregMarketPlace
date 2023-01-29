@@ -11,7 +11,7 @@ const Connect = ({ className,account }) => {
       </div>
       <div className={styles.info}>
         You need to connect your wallet first to sign messages and send
-        transaction to Ethereum network
+        transaction to Binance Smart Chain
       </div>
       {/* <div className={styles.btns}>
         <button className={cn("button", styles.button)}>Connect wallet</button>

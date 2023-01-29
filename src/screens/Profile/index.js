@@ -11,6 +11,7 @@ import Followers from "./Followers";
 import { bids } from "../../mocks/bids";
 import { useSelector } from "react-redux";
 import { toChecksumAddress } from "ethereum-checksum-address";
+import { useWeb3React } from "@web3-react/core";
 
 const navLinks = [
   "On Sale",
@@ -183,6 +184,7 @@ const Profile = () => {
   const {index} = useParams()
   const [activeIndex, setActiveIndex] = useState(0);
   const [visible, setVisible] = useState(false);
+  const {account} = useWeb3React()
 
   const items = useSelector((state) => {
     return state.adoptReducer.data;
@@ -196,7 +198,7 @@ const Profile = () => {
 
   const bids = bids2 && bids2.filter(item=>toChecksumAddress(item.address) === toChecksumAddress(items[index][2]) )
 
-
+  console.log("items",account)
 
   return (
     <div className={styles.profile}>
@@ -208,20 +210,23 @@ const Profile = () => {
       >
         <div className={cn("container", styles.container)}>
           <div className={styles.btns}>
-            <button
+            {/* <button
               className={cn("button-stroke button-small", styles.button)}
               onClick={() => setVisible(true)}
             >
               <span>Edit cover photo</span>
               <Icon name="edit" size="16" />
-            </button>
-            <Link
+            </button> */}
+            {account == items[index][2]?
+              <Link
               className={cn("button-stroke button-small", styles.button)}
-              to="profile-edit"
+              to={{pathname:"/profile-edit",state:items[index]}}
             >
               <span>Edit profile</span>
               <Icon name="image" size="16" />
-            </Link>
+            </Link> : null
+            }
+          
           </div>
           <div className={styles.file}>
             <input type="file" />

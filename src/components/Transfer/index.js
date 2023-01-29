@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import cn from "classnames";
 import styles from "./Transfer.module.sass";
 
-const Transfer = ({ className }) => {
+const Transfer = ({ className,changePrice }) => {
+  const [amount,setAmount] = useState()
   return (
     <div className={cn(className, styles.transfer)}>
       <div className={cn("h4", styles.title)}>Transfer token</div>
@@ -13,13 +14,14 @@ const Transfer = ({ className }) => {
       <div className={styles.field}>
         <input
           className={styles.input}
-          type="text"
-          name="address"
-          placeholder="Paste address"
+          onChange={(e)=>{setAmount(e.target.value)}}
+          type="number"
+
+          placeholder="Enter Price"
         />
       </div>
       <div className={styles.btns}>
-        <button className={cn("button", styles.button)}>Continue</button>
+        <button onClick={()=>{changePrice(amount)}} className={cn("button", styles.button)}>Continue</button>
         <button className={cn("button-stroke", styles.button)}>Cancel</button>
       </div>
     </div>

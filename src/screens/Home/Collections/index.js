@@ -86,13 +86,13 @@ const Collections = () => {
   };
 
 
-  const bids2 = useSelector((state) => {
-    return state.adoptReducer.bids;
+  const bids = useSelector((state) => {
+    return state.adoptReducer.moralisData;
   });
 
 
 
-  const bids = bids2 && bids2.filter(item=>item.title!=`Server error`)
+//  const bids = bids2 && bids2.filter(item=>item.title!=`Server error`)
 
 
 var myArray = [[],[],[],[],[],[]]
@@ -117,7 +117,7 @@ const temArray = []
 //       }
 //  })
 
-bids2 && bids.map((v,e)=>{
+bids && bids.map((v,e)=>{
     if(v.album.slice(0,2)=="00"){
       myArray[0].push(v)
     }else if(v.album.slice(0,2)=="01"){
@@ -135,7 +135,7 @@ bids2 && bids.map((v,e)=>{
 
 
 
-bids2 &&   console.log("myarray",myArray)
+//bids2 &&   console.log("myarray",myArray)
 
   return (
     <div className={cn("section-bg", styles.section)}>
@@ -144,7 +144,7 @@ bids2 &&   console.log("myarray",myArray)
           <h3 className={cn("h3", styles.title)}>Hot collections</h3>
           <div className={styles.inner}>
             <Slider className="collection-slider" {...settings}>
-              {bids2 && myArray.map((x, index) => 
+              {bids && myArray.map((x, index) => 
               { if(x.length>0){
                 return (
                   <Link className={styles.item} to={{pathname: `/region/${(territories2[`0${index}`])}` , state : x[0].album.slice(0,2) } } key={index}>

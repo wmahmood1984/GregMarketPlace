@@ -5,12 +5,14 @@ import { formatEther, formatUnits } from "ethers/lib/utils.js";
 import Web3 from "web3"
 const { toChecksumAddress } = require('ethereum-checksum-address')
 const { createSlice, createAsyncThunk } = require("@reduxjs/toolkit");
+
+//const web3 = new Web3(new Web3.providers.HttpProvider("https://data-seed-prebsc-1-s1.binance.org:8545"))
 const web3 = new Web3(Web3.givenProvider)
 
-const provider = new providers.Web3Provider(window.ethereum)
 
 
-const marketContract = new Contract(MarketAdd,MarketAbi,provider);
+
+
 const marketContract2 = new web3.eth.Contract(MarketAbi,MarketAdd)
 
 
@@ -22,7 +24,7 @@ export const dataBase = createAsyncThunk(
       const tx1 = await client.query(
     
         q.Paginate(
-        q.Match(q.Index('Address3'))
+        q.Match(q.Index('Address5'))
         ))        
         
    
@@ -47,73 +49,46 @@ export const getData = createAsyncThunk(
       // console.log("condition met4",window.ethereum.networkVersion)
       // if(window.ethereum.networkVersion===network){
 
-        const tx1 = await marketContract2.methods.getArray().call()
-        console.log("get Data ran",tx1)
-        const tx2 = await client.query(
+      const tx1 = await marketContract2.methods.getArray().call()
+
+        // const tx2 = await client.query(
       
-          q.Paginate(
-          q.Match(q.Index('Address3'))
-          )) 
-        
+        //   q.Paginate(
+        //   q.Match(q.Index('Address5'))
+        //   )) 
+       console.log("tx1",tx1)
+      //  console.log("tx2",tx2)        
   
-        const functionX = async (v,e)=>{
-          setTimeout(() => {
-            thunkApi.dispatch(
-              getMoralis({
+        // const functionX = async (v,e)=>{
+        //   setTimeout(() => {
+        //     thunkApi.dispatch(
+        //       getMoralis({
                 
-                item: v,
-                data:tx2.data
-              })
-            );
+        //         item: v,
+        //         data:tx2.data
+        //       })
+        //     );
             
   
-          }, e*1200);
-        }
+        //   }, 200);
+        // }
   
   
-        tx1 && tx1.map((v,e)=>{
-          functionX(v,e)
-        })
+        // tx1 && tx1.map((v,e)=>{
+        //   functionX(v,e)
+        // })
         return {tx1}
   
 
-      // }else {
 
-        try {
-          window.ethereum.request({
-           method: 'wallet_switchEthereumChain',
-           params: [{ chainId: networkhex }]
-         });
-       } catch (err) {
-        console.log(err)
- //          This error code indicates that the chain has not been added to MetaMask
-         if (err.code === 4902) {
-           window.ethereum.request({
-             method: 'wallet_addEthereumChain',
-             params: [
-               {
-                 chainName: 'BSC Mainnet',
-                 chainId: networkhex,
-                 nativeCurrency: { name: 'TBNB', decimals: 18, symbol: 'BNB' },
-                 rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545']
-               }
-             ]
-           });
-           window.alert("This chain is not configured in your metamask"
-           // ,{
-           //   type: "failure",
-           //   position: toast.POSITION.BOTTOM_CENTER,
-           //   closeOnClick: true,
-           //   }
-             )
-         }
-       }
-        return {tx1:null}
-//      }
+
+   
+
+
 
 
     } catch (error) {
-      console.log("Error in ArrayThunk", error);
+      console.log("Error in get Data", error);
     }
   }
 );
@@ -127,41 +102,45 @@ export const getMoralis = createAsyncThunk(
     const getName = (add)=>{
 
       const tx1 = data.filter(item=> toChecksumAddress(item[2])===toChecksumAddress(add))
-
+//      console.log("getName",tx1)  
       return  {name:tx1[0][0],email:tx1[0][1],address:tx1[0][2],image:tx1[0][3]}
     }
     try {
 
  
-          const _data = await axios.get(
-            `https://deep-index.moralis.io/api/v2/nft/${item.tokenAdd}/${utils.formatUnits(item.tokenId,0)}?chain=bsc%20testnet&format=decimal&normalizeMetadata=true`,
-            {headers:{'X-API-Key': 'SXF7SQmSpjNYErW3zHBorgED0PGPVaiH9VlhXol46NY02JNL315MxMdx0CFTglxR', 
-            'accept': 'application/json'}}
-            )
+          // const _data = await axios.get(
+          //   `https://deep-index.moralis.io/api/v2/nft/${item.tokenAdd}/${utils.formatUnits(item.tokenId,0)}?chain=bsc%20testnet&format=decimal&normalizeMetadata=true`,
+          //   {headers:{'X-API-Key': 'SXF7SQmSpjNYErW3zHBorgED0PGPVaiH9VlhXol46NY02JNL315MxMdx0CFTglxR', 
+          //   'accept': 'application/json'}}
+          //   )
 
-            const eth = await axios.get(
-              "https://api.coingecko.com/api/v3/coins/binancecoin/market_chart?vs_currency=usd&days=7"
-            )
 
-//            console.log("etjh",eth.data.prices[eth.data.prices.length-1][1])
-            const ethprice = eth.data.prices[eth.data.prices.length-1][1]
+
+            console.log("redux",item)
+
 
 
             return  {
-              title: `${_data.data.normalized_metadata.name===null? "not found" : _data.data.normalized_metadata.name}`,
+              title: `${item[14][2]===null? "not found" : item[14][2]}`,
               address: item.beneficiary,
               creator: `${getName(item.beneficiary).name}`,
-              currency: `${utils.formatEther(item.reserve)} BNB` ,
-              price: `$${(utils.formatEther(item.reserve) *ethprice).toFixed(0) }`,
+              currency: `${Number(utils.formatEther(item.reserve)).toFixed(0)} TVL` ,
+              price: `${Number(utils.formatEther(item.reserve)).toFixed(0) }`,
+              priceA: Number(utils.formatEther(item.reserve)).toFixed(0),
               avatar: `${getName(item.beneficiary).image }`,
-              image: `${_data.data.normalized_metadata.image===null? "https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled.png" : _data.data.normalized_metadata.image}`,
-              image2x: `${_data.data.normalized_metadata.image===null? "https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled.png" : _data.data.normalized_metadata.image}`,
+              image: `${item[14][1]===null? "https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled.png" : Number(item.category_album_collectible[2])==1? `${item[14][1]}?stream=true`:`${item[14][1]}`}`,
+              image2x: `${item[14][1]===null? "https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled.png" : Number(item.category_album_collectible[2])==1? `${item[14][1]}?stream=true`:`${item[14][1]}`}`,
               auctionEnd : utils.formatUnits(item.auctionEnd,0),
               index:utils.formatUnits(item.index,0),
               tokenId:utils.formatUnits(item.tokenId,0)
+              ,catetory : formatUnits(item.category_album_collectible[0],0)
               ,tokenAdd: item.tokenAdd
               ,highestBid:item.highestBid
               ,highestBidder:item.highestBidder
+              ,album:item.album
+              ,playAble:Number(item.category_album_collectible[2])==1?true:false
+              ,travelOffer:Number(item.category_album_collectible[1])==1?true:false
+              ,amount:10
             }
   
       }
@@ -204,6 +183,103 @@ export const Buy = createAsyncThunk(
 );
 
 
+const initData =       [    {tokenId:"57",
+tokenAdd:"0x87abD078e4d05d2D0179B41Bb14fE49f41910E91",
+beneficiary: "0xfef5f69FA76f35638Aa3ed77a0644Fa79d31A554",
+auctionEnd:"1675073040",highestBidder:[],highestBid:[],open:true,
+reserve:"1000000000000000000",index:0,
+soldTo:"0x0000000000000000000000000000000000000000",soldFor:0,UpForSale:false,
+royaltyHolder: "0xfef5f69FA76f35638Aa3ed77a0644Fa79d31A554",
+category_album_collectible:[0,1,0]
+,uri:["Kulfi delicious","https://gateway.pinata.cloud/ipfs/QmRpuWFLpjcp77fSqfxeZtG29RmrBeiwRMZrQCc4x6a1yC","Kulfi"]
+,album:"000101"
+},
+{tokenId:"59",
+tokenAdd:"0x87abD078e4d05d2D0179B41Bb14fE49f41910E91",
+beneficiary: "0xfef5f69FA76f35638Aa3ed77a0644Fa79d31A554",
+auctionEnd:"1675073040",highestBidder:[],highestBid:[],open:true,
+reserve:"1000000000000000000",index:0,
+soldTo:"0x0000000000000000000000000000000000000000",soldFor:0,UpForSale:false,
+royaltyHolder: "0xfef5f69FA76f35638Aa3ed77a0644Fa79d31A554",
+category_album_collectible:[0,1,0]
+,uri:["Jin Description",    "https://gateway.pinata.cloud/ipfs/QmTmjVwe1xqctRYQBSK37zRY3WSAffKYsTYMeo6qdjYJUt","Jin"]
+,album:"010101"
+},   {tokenId:"61",
+tokenAdd:"0x87abD078e4d05d2D0179B41Bb14fE49f41910E91",
+beneficiary: "0xfef5f69FA76f35638Aa3ed77a0644Fa79d31A554",
+auctionEnd:"1675073040",highestBidder:[],highestBid:[],open:true,
+reserve:"1000000000000000000",index:0,
+soldTo:"0x0000000000000000000000000000000000000000",soldFor:0,UpForSale:false,
+royaltyHolder: "0xfef5f69FA76f35638Aa3ed77a0644Fa79d31A554",
+category_album_collectible:[0,1,0]
+,uri:["Activity",    "https://gateway.pinata.cloud/ipfs/QmNd4eZEVbH3te38ShsDodXxz5Wrg1EvVJtUwXdVGcwxXY"
+,"Activity"]
+,album:"020101"
+},   {tokenId:"62",
+tokenAdd:"0x87abD078e4d05d2D0179B41Bb14fE49f41910E91",
+beneficiary: "0xfef5f69FA76f35638Aa3ed77a0644Fa79d31A554",
+auctionEnd:"1675073040",highestBidder:[],highestBid:[],open:true,
+reserve:"15000000000000000000",index:0,
+soldTo:"0x0000000000000000000000000000000000000000",soldFor:0,UpForSale:false,
+royaltyHolder: "0xfef5f69FA76f35638Aa3ed77a0644Fa79d31A554",
+category_album_collectible:[0,1,0]
+,uri:["Billi Activity",    "https://gateway.pinata.cloud/ipfs/QmUgjGT3HRwXir362ZGSLGrTHRp5YkJvVXF42Ucudou8gP"
+,"Billi"]
+,album:"030202"
+},   {tokenId:"63",
+tokenAdd:"0x87abD078e4d05d2D0179B41Bb14fE49f41910E91",
+beneficiary: "0xfef5f69FA76f35638Aa3ed77a0644Fa79d31A554",
+auctionEnd:"1675073040",highestBidder:[],highestBid:[],open:true,
+reserve:"15000000000000000000",index:0,
+soldTo:"0x0000000000000000000000000000000000000000",soldFor:0,UpForSale:false,
+royaltyHolder: "0xfef5f69FA76f35638Aa3ed77a0644Fa79d31A554",
+category_album_collectible:[0,1,0]
+,uri:["Piegeon Description",    "https://gateway.pinata.cloud/ipfs/QmSLsmx3jjn9hFx1Gdk8aj5xcGNjHrZAV9VQwPSbQ2Yq5k"
+,"Piegeon"]
+,album:"000101"
+},   {tokenId:"65",
+tokenAdd:"0x87abD078e4d05d2D0179B41Bb14fE49f41910E91",
+beneficiary: "0xfef5f69FA76f35638Aa3ed77a0644Fa79d31A554",
+auctionEnd:"1675073040",highestBidder:[],highestBid:[],open:true,
+reserve:"15000000000000000000",index:0,
+soldTo:"0x0000000000000000000000000000000000000000",soldFor:0,UpForSale:false,
+royaltyHolder: "0xfef5f69FA76f35638Aa3ed77a0644Fa79d31A554",
+category_album_collectible:[0,1,0]
+,uri:["Gizza pyramix",    "https://gateway.pinata.cloud/ipfs/QmP1WE4H9kreQrx4JXjS5EzUziQFv3LpjTDkTqsGXqsEvZ"
+
+,"Gizza"]
+,album:"001401"
+},   {tokenId:"66",
+tokenAdd:"0x87abD078e4d05d2D0179B41Bb14fE49f41910E91",
+beneficiary: "0xfef5f69FA76f35638Aa3ed77a0644Fa79d31A554",
+auctionEnd:"1675073040",highestBidder:[],highestBid:[],open:true,
+reserve:"20000000000000000000",index:0,
+soldTo:"0x0000000000000000000000000000000000000000",soldFor:0,UpForSale:false,
+royaltyHolder: "0xfef5f69FA76f35638Aa3ed77a0644Fa79d31A554",
+category_album_collectible:[0,1,0]
+,uri:["ACCC Conductor",    "https://gateway.pinata.cloud/ipfs/Qme9LzAZQud44qGmeaP9xXQLvihQumCs5AkHdjPrcmPnNJ"
+,"ACCC"]
+,album:"010101"
+}
+,   {tokenId:"67",
+tokenAdd:"0x87abD078e4d05d2D0179B41Bb14fE49f41910E91",
+beneficiary: "0xfef5f69FA76f35638Aa3ed77a0644Fa79d31A554",
+auctionEnd:"1675073040",highestBidder:[],highestBid:[],open:true,
+reserve:"14000000000000000000",index:0,
+soldTo:"0x0000000000000000000000000000000000000000",soldFor:0,UpForSale:false,
+royaltyHolder: "0xfef5f69FA76f35638Aa3ed77a0644Fa79d31A554",
+category_album_collectible:[0,1,0]
+,uri:["Kingdom Tower",    "https://gateway.pinata.cloud/ipfs/QmPejqhSVpcsiY4ujjAugAUuBxQf8F8jEDH52CTPWmYdko"
+
+,"Kingdom"]
+,album:"030301"
+}
+
+
+
+
+]
+
 
 
 
@@ -214,18 +290,9 @@ const adoptSlice = createSlice({
     ethBalance: null,
     data:null,
     bids:null,
-    sortedBids:[],
-    moralisData:[
-      // {
-      //   title: "the creator network®",
-      //   creator: "Enrico Cole",
-      //   currency: "1.00 ETH",
-      //   price: "$3,618.36",
-      //   avatar: "/images/content/avatar-creator.jpg",
-      //   image: "/images/content/video-preview.jpg",
-      //   image2x: "/images/content/video-preview@2x.jpg",
-      // }
-    ],
+    sortedBids:initData,
+    moralisData:initData,
+    moralisData1:[],
     highestBid : [],
     highestBidder : [],
 
@@ -248,19 +315,29 @@ const adoptSlice = createSlice({
            
        ;
     },
+    setInitialMoralis: (state,actions)=>{
+      state.moralisData = actions.payload
+    },
     filterBids: (state,actions) =>{
-//      console.log("sort bids called",actions.payload)
-      if(actions.payload===0){
-        state.sortedBids = state.bids
+      console.log("sort bids called",actions.payload)
+      if(actions.payload.num===0){
+        state.sortedBids = actions.payload.data
       } else {
-        state.sortedBids = state.bids.filter(item=> Number(formatUnits(item.category,0))===actions.payload-1);
+        
+        state.sortedBids = actions.payload.data.filter((item,i)=> 
+          {
+            console.log("first",i,item.catetory,actions.payload.num-1)
+            return(item.category_album_collectible[0]==actions.payload.num-1)
+          }  
+
+          );
       }
 
     },
 
     sortByPrice: (state,actions) =>{
 
-      const asc = state.bids.sort((a,b)=>(Number(formatEther(a.reserve)) - Number(formatEther(b.reserve))) )
+      const asc = state.moralisData.sort((a,b)=>(Number(formatEther(a.reserve)) - Number(formatEther(b.reserve))) )
       
 
       if(actions.payload==="Highest price"){
@@ -272,14 +349,20 @@ const adoptSlice = createSlice({
 
     },
     filterByPrice: (state,actions) =>{
-//      console.log("sort bids called",actions.payload)
-      state.sortedBids = state.bids.filter(item=> Number(formatEther(item.reserve))<=Number(actions.payload[0]));
+
+      state.sortedBids = state.moralisData.filter(item=> 
+        {      console.log("sort bids called",formatEther(item.reserve),actions.payload[0])
+          return (        Number(formatEther(item.reserve)) <= Number(actions.payload[0]))
+        }
+
+        
+        );
 
 
     },
     filterByCountry: (state,actions) =>{
  //     console.log("sort bids called",actions.payload)
-      state.sortedBids = state.bids.filter(item=> item.album===actions.payload)}
+      state.sortedBids = actions.payload.data.filter(item=> item.album===actions.payload.code)}
   },
   extraReducers: {
     [dataBase.pending]: (state, action) => {
@@ -308,9 +391,10 @@ const adoptSlice = createSlice({
     },
     [getData.fulfilled]: (state, action) => {
       state.toggle = !state.toggle;
-   //   console.log("tx1",action.payload)
-      state.bids = action.payload.tx1;
+      console.log("tx1 with moralis",action.payload)
+      state.moralisData = action.payload.tx1;
       state.sortedBids = action.payload.tx1;
+
     },
 
 
@@ -321,10 +405,11 @@ const adoptSlice = createSlice({
     [getMoralis.fulfilled]: (state, action) => {
       state.toggle = !state.toggle;
 
-      state.moralisData.push(action.payload);
-
+      state.moralisData1.push(action.payload);
+      
       state.highestBid.push(action.payload.highestBid);
       state.highestBidder.push(action.payload.highestBidder);
+      state.sortedBids.push(action.payload);
     },
 
 
@@ -335,4 +420,4 @@ const adoptSlice = createSlice({
 });
 
 export const adopreducer = adoptSlice.reducer;
-export const { toggle, setTest,setBids,sortBidsAsc,filterBids,sortByPrice,filterByPrice,filterByCountry } = adoptSlice.actions;
+export const { toggle, setTest,setBids,sortBidsAsc,filterBids,sortByPrice,filterByPrice,filterByCountry,setInitialMoralis } = adoptSlice.actions;

@@ -46,7 +46,7 @@ export default function Component({item}) {
 
     return (
         <div className={styles.preview} >
-        <img src={URI && URI.image} alt="Collection" />
+        <img src={item.uri[1]} alt="Collection" />
             </div>
   )
 }

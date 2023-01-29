@@ -58,7 +58,7 @@ const Hot3 = ({ classSection, title,code }) => {
   // });
 
   const bids2 = useSelector((state) => {
-    return state.adoptReducer.bids;
+    return state.adoptReducer.moralisData;
   });
 
 const bids3 = bids2 && bids2.filter(item=>item.title!=`Server error`)  
@@ -73,7 +73,7 @@ const bids6 = bids2 && bids5.filter(item=> item.album.slice(0,4)===code)
 
 const travelOffer = title == "Travel Offers" ? true : false
 
-const bids = bids2 && travelOffer?  bids6.filter(item=>item.category_album_collectible[1]==1) : bids6.filter(item=>item.category_album_collectible[1]==0)
+const bids = bids2 && travelOffer?  bids6.filter(item=>item.travelOffer==true) : bids6.filter(item=>item.travelOffer==false)
 //console.log("refine in hot",bids)
 
 

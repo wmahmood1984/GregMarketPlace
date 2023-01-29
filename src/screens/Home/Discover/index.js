@@ -36,13 +36,11 @@ const Discover = () => {
   const [creator, setCreator] = useState(creatorOptions[0]);
   const [sorting, setSorting] = useState(sortingOptions[0]);
   const dispatch = useDispatch()
-  const [values, setValues] = useState([0.0001]);
+  const [values, setValues] = useState([1]);
 
   const [visible, setVisible] = useState(false);
 
-  const STEP = 0.0001;
-  const MIN = 0.0001;
-  const MAX = 0.0005;
+
 
   const settings = {
     infinite: true,
@@ -75,16 +73,37 @@ const Discover = () => {
 
 
   
-  const bids2 = useSelector((state) => {
+  const bids = useSelector((state) => {
     return state.adoptReducer.sortedBids;
   });
 
+  const moralis = useSelector((state) => {
+    return state.adoptReducer.moralisData;
+  });
 
+function Max (arr){
+    var max = 0
+    var index = 0
+    for(var i in arr){
+        if(arr[i]>max){
+            max = arr[i]
+            index = i;
+        }
+    }
 
-   const bids = bids2 && bids2.filter(item=>item.title!=`Server error`)  
+    return max
+}
+
+ //  const bids = bids2 && bids2.filter(item=>item.title!=`Server error`)
+   
+   const highestAmount = bids && Max(bids.map((v,e)=>Number(formatEther(v.reserve)) ))
+
+   const STEP = 1;
+   const MIN = 0;
+   const MAX = bids ?  highestAmount : 18;
   // const bids4 = [...bids3]
 
-bids2 && bids.map(v=>console.log(formatEther(v.reserve)))
+  console.log("bids in dics",highestAmount)
 
   const Sort = (num)=>{
 
@@ -97,7 +116,7 @@ bids2 && bids.map(v=>console.log(formatEther(v.reserve)))
 
   const Filter = (num)=>{
     setCategory(num)
-    dispatch(filterBids(navLinks.indexOf(num)))
+    dispatch(filterBids({num:navLinks.indexOf(num),data:moralis}))
   }
 
   const bids7 = useSelector((state) => {
@@ -135,7 +154,7 @@ const getName = (add)=>{
 //  return  {name:tx1[0][0],email:tx1[0][1],address:tx1[0][2],image:tx1[0][3]}
 }
 
-//console.log("value",values)
+console.log("bids",bids)
 
   return (
     <div className={cn("section", styles.section)}>
@@ -148,6 +167,7 @@ const getName = (add)=>{
               value={date}
               setValue={Sort}
               options={dateOptions}
+              setInd={()=>{}}
             />
           </div>
           {/* <div className={styles.nav}>
@@ -169,6 +189,7 @@ const getName = (add)=>{
               value={category}
               setValue={Filter}
               options={navLinks}
+              setInd={()=>{}}
             />
           </div>
           <div className={cn("tablet-show", styles.dropdown)}>
@@ -177,6 +198,7 @@ const getName = (add)=>{
               value={sorting}
               setValue={setSorting}
               options={sortingOptions}
+              setInd={()=>{}}
             />
           </div>
           <button
@@ -200,6 +222,7 @@ const getName = (add)=>{
                 setValue={sortbyPrice}
 //                setValue={setPrice}
                 options={priceOptions}
+                setInd={()=>{}}
               />
             </div>
             {/* <div className={styles.cell}>
@@ -218,11 +241,12 @@ const getName = (add)=>{
                 value={creator}
                 setValue={setCreator}
                 options={creatorOptions}
+                setInd={()=>{}}
               />
             </div>
             <div className={styles.cell}>
               <div className={styles.label}>Price range</div>
-              <Range
+              {/* <Range
                 values={values}
                 step={STEP}
                 min={MIN}
@@ -292,14 +316,14 @@ const getName = (add)=>{
                         backgroundColor: "#141416",
                       }}
                     >
-                      {values[0].toFixed(4)}
+                      {values[0].toFixed(0)}
                     </div>
                   </div>
                 )}
-              />
+              /> */}
               <div className={styles.scale}>
-                <div className={styles.number}>{MIN} ETH</div>
-                <div className={styles.number}>{MAX} ETH</div>
+                <div className={styles.number}>{MIN} TVL</div>
+                <div className={styles.number}>{MAX} TVL</div>
               </div>
             </div>
           </div>
@@ -309,9 +333,15 @@ const getName = (add)=>{
             className={cn("discover-slider", styles.slider)}
             {...settings}
           >
-            {bids && bids.map((x, index) => (
-              <Card4 className={styles.card} item={x} key={index} />
-            ))}
+            {bids && bids.map((x, index) => 
+           { 
+          
+          return(
+              
+            <Card4 className={styles.card} item={x} key={index} />
+          ) 
+        }
+           )}
           </Slider>
         </div>
         <div className={styles.btns}>

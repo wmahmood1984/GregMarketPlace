@@ -20,9 +20,9 @@ const PutSale2 = ({saleAuction,Approval,Sale, className,setVisibleModalSale,canc
   const [time,setTime] = useState(0)
   const [continent, setcontinent] = useState(Continents[0]);
   const [continentInd, setcontinentInd] = useState(0);
-  const [subCon, setsubCon] = useState(0);
+  const [subCon, setsubCon] = useState(Cdata[continentInd].subMenu[0].title);
   const [subConInd, setsubConInd] = useState(0);
-  const [country, setCountry] = useState();
+  const [country, setCountry] = useState(0);
   const [countryInd, setCountryInd] = useState(0);
   const [travelOffer, settravelOffer] = useState(false);
 //  console.log("obje",{Sale, className,setVisibleModalSale,cancelandSaleDone,price,setPrice,commission,id,add })
@@ -30,6 +30,8 @@ const PutSale2 = ({saleAuction,Approval,Sale, className,setVisibleModalSale,canc
   const subConArray = Cdata[continentInd].subMenu!=null ? Cdata[continentInd].subMenu.map((v,e)=>v.title) : []
 
   const countryArray = Cdata[continentInd].subMenu ? Cdata[continentInd].subMenu[subConInd].subMenu?.map((v,e)=>v.title) : []
+
+
 
   const items = [
 
@@ -48,9 +50,11 @@ const PutSale2 = ({saleAuction,Approval,Sale, className,setVisibleModalSale,canc
       const x = a<10? `0${a}` : a
       const y = b+1<10? `0${b+1}` : b
       const z = c+1<10? `0${c+1}` : c
-      console.log("index",x+y+z)
+    //  console.log("index",x+y+z)
       return x+y+z
     }
+
+    console.log("contry array",subConArray)
 
   return (
     <div className={cn(className, styles.sale)}>
@@ -72,7 +76,7 @@ const PutSale2 = ({saleAuction,Approval,Sale, className,setVisibleModalSale,canc
       </div>
       <div className={styles.table}>
           <div className={styles.row} >
-            <div className={styles.col}>Enter your Price</div>
+            <div className={styles.col}>Enter your Price TVL - BUSD</div>
             <input type="number" value={price} onChange={(e)=>{setPrice(e.target.value)}} className={styles.col}></input>
           </div>
           <div className={styles.row} >

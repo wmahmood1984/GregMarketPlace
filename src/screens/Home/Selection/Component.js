@@ -56,7 +56,7 @@ export default function Component({x}) {
          <Link className={styles.card} to={`/item/${formatUnits(x.index,0)}`} >
                     <div className={styles.preview}>
                       <img
-//                        srcSet={`${x.image2x} 2x`}
+//                        srcSet={`${x.image} 2x`}
                         src={URI && URI.image}
                         alt="Selection"
                       />

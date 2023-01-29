@@ -98,7 +98,7 @@ const Hero2 = ({ subtitle, title, link,code }) => {
   })  ;
 
   const items2 = useSelector((state) => {
-    return state.adoptReducer.bids;
+    return state.adoptReducer.moralisData;
   });
 
   const items3 = items2 && items2.filter(item=>item.title!=`Server error`)

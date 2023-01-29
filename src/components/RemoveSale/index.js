@@ -2,7 +2,7 @@ import React from "react";
 import cn from "classnames";
 import styles from "./RemoveSale.module.sass";
 
-const RemoveSale = ({ className }) => {
+const RemoveSale = ({ className,cancelAuction }) => {
   return (
     <div className={cn(className, styles.transfer)}>
       <div className={cn("h4", styles.title)}>Remove from sale</div>
@@ -11,7 +11,7 @@ const RemoveSale = ({ className }) => {
         anytime
       </div>
       <div className={styles.btns}>
-        <button className={cn("button", styles.button)}>Remove now</button>
+        <button onClick={cancelAuction} className={cn("button", styles.button)}>Remove now</button>
         <button className={cn("button-stroke", styles.button)}>Cancel</button>
       </div>
     </div>

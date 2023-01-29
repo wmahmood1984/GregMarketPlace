@@ -9,7 +9,7 @@ import Dropdown from "../../../components/Dropdown";
 import DropdownEmpty from "../../../components/DropdownEmpty";
 import { useSelector } from "react-redux";
 
-const items2 = [
+const items3 = [
   {
     name: "Edd Harris",
     sign: "/images/content/cup.svg",
@@ -18,7 +18,7 @@ const items2 = [
     color: "#3772FF",
     avatar: "/images/content/avatar-5.jpg",
     reward: "/images/content/reward-1.svg",
-    price: "<span>2.456</span> ETH",
+    price: "<span>2.456</span> TVL",
   },
   {
     name: "Odell Hane",
@@ -28,7 +28,7 @@ const items2 = [
     color: "#9757D7",
     avatar: "/images/content/avatar-6.jpg",
     reward: "/images/content/reward-1.svg",
-    price: "<span>2.456</span> ETH",
+    price: "<span>2.456</span> TVL",
   },
   {
     name: "Marlee Kuphal",
@@ -38,7 +38,7 @@ const items2 = [
     color: "#45B26B",
     avatar: "/images/content/avatar-7.jpg",
     reward: "/images/content/reward-1.svg",
-    price: "<span>2.456</span> ETH",
+    price: "<span>2.456</span> TVL",
   },
   {
     name: "Payton Kunde",
@@ -48,7 +48,7 @@ const items2 = [
     color: "#23262F",
     avatar: "/images/content/avatar-8.jpg",
     reward: "/images/content/reward-1.svg",
-    price: "<span>2.456</span> ETH",
+    price: "<span>2.456</span> TVL",
   },
   {
     name: "Payton Buckridge",
@@ -58,7 +58,7 @@ const items2 = [
     color: "#777E90",
     avatar: "/images/content/avatar-9.jpg",
     reward: "/images/content/reward-1.svg",
-    price: "<span>2.456</span> ETH",
+    price: "<span>2.456</span> TVL",
   },
   {
     name: "Edd Harris",
@@ -68,7 +68,7 @@ const items2 = [
     color: "#3772FF",
     avatar: "/images/content/avatar-5.jpg",
     reward: "/images/content/reward-1.svg",
-    price: "<span>2.456</span> ETH",
+    price: "<span>2.456</span> TVL",
   },
   {
     name: "Odell Hane",
@@ -78,7 +78,7 @@ const items2 = [
     color: "#9757D7",
     avatar: "/images/content/avatar-6.jpg",
     reward: "/images/content/reward-1.svg",
-    price: "<span>2.456</span> ETH",
+    price: "<span>2.456</span> TVL",
   },
   {
     name: "Marlee Kuphal",
@@ -88,7 +88,7 @@ const items2 = [
     color: "#45B26B",
     avatar: "/images/content/avatar-7.jpg",
     reward: "/images/content/reward-1.svg",
-    price: "<span>2.456</span> ETH",
+    price: "<span>2.456</span> TVL",
   },
 ];
 
@@ -142,9 +142,25 @@ const Popular = () => {
   const [date, setDate] = useState(dateOptions[0]);
   const [direction, setDirection] = useState(directionOptions[0]);
 
-  const items = useSelector((state) => {
+  const items2 = useSelector((state) => {
     return state.adoptReducer.data;
   });
+
+
+  const items = items2 && items2.map((v,e)=>{
+    return {
+      name: v[0],
+      sign: "/images/content/lightning.svg",
+      number: "3",
+      url: "/profile",
+      color: "#45B26B",
+      avatar: v[3],
+      reward: "/images/content/reward-1.svg",
+      price: "<span>2.456</span> TVL",
+    }
+  })
+
+//  console.log("items2",items)
 
   return (
     <div className={cn("section-bg", styles.section)}>
@@ -177,12 +193,12 @@ const Popular = () => {
                   <div className={styles.head}>
                     <div
                       className={styles.rating}
-                      style={{ backgroundColor: items[index].color }}
+                      style={{ backgroundColor: x.color }}
                     >
                       <div className={styles.icon}>
-                        <img src={items[index].sign} alt="Rating" />
+                        <img src={x.sign} alt="Rating" />
                       </div>
-                      <div className={styles.number}>#{items[index].number}</div>
+                      <div className={styles.number}>#{x.number}</div>
                     </div>
                     <div className={styles.control}>
                       <Add className={styles.button} />
@@ -193,9 +209,9 @@ const Popular = () => {
                   </div>
                   <div className={styles.body}>
                     <div className={styles.avatar}>
-                      <img src={x[3]} alt="Avatar" />
+                      <img src={x.avatar} alt="Avatar" />
                       <div className={styles.reward}>
-                        <img src={items[index].reward} alt="Reward" />
+                        <img src={x.reward} alt="Reward" />
                       </div>
                     </div>
                     <div className={styles.name}>{x[0]}</div>

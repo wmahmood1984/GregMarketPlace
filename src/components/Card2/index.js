@@ -20,7 +20,7 @@ const Card2 = ({ className, item,number}) => {
         'accept': 'application/json'}}
         )
         setData(_data.data)
-        console.log(_data.data)
+       // console.log(_data.data)
       }
     
 

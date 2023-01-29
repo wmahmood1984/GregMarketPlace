@@ -58,7 +58,7 @@ const Hot = ({ classSection, title }) => {
   // });
 
   const bids2 = useSelector((state) => {
-    return state.adoptReducer.bids;
+    return state.adoptReducer.moralisData;
   });
 
 const bids3 = bids2 && bids2.filter(item=>item.title!=`Server error`)  
@@ -69,7 +69,7 @@ const refindArray = bids2 && bids4.sort((a, b) => a.highestBidder.length - b.hig
 
 const bids = bids3 && refindArray.reverse()
 
-// console.log("refine in hot",bids)
+//console.log("refine in hot",bids)
 
 
 

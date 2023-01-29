@@ -88,7 +88,7 @@ const Upload2 = () => {
   const [continentInd, setcontinentInd] = useState(0);
   const [subCon, setsubCon] = useState(0);
   const [subConInd, setsubConInd] = useState(0);
-  const [country, setCountry] = useState();
+  const [country, setCountry] = useState(0);
   const [numberOfNFT, setNumberOfNFT] = useState();
   const [countryInd, setCountryInd] = useState(0);
   const [play, setPlay] = useState(false);
@@ -100,16 +100,16 @@ const Upload2 = () => {
 
 
 
-const subConArray = Cdata[continentInd].subMenu!=null ? Cdata[continentInd].subMenu.map((v,e)=>v.title) : []
+  const subConArray = Cdata[continentInd].subMenu!=null ? Cdata[continentInd].subMenu.map((v,e)=>v.title) : []
 
-const countryArray = Cdata[continentInd].subMenu ? Cdata[continentInd].subMenu[subConInd].subMenu?.map((v,e)=>v.title) : []
+  const countryArray = Cdata[continentInd].subMenu ? Cdata[continentInd].subMenu[subConInd].subMenu?.map((v,e)=>v.title) : []
 
 
 function indexGenerator(a,b,c){
   const x = a<10? `0${a}` : a
   const y = b+1<10? `0${b+1}` : b
   const z = c+1<10? `0${c+1}` : c
-  console.log("index",x+y+z)
+//  console.log("index",x+y+z)
   return x+y+z
 }
 
@@ -253,8 +253,8 @@ setLockLoader(true)
     ,    [
       categoriesOptions.indexOf(categories),
        
-      trvOff,playAble
-    ],ind,description,
+      trvOff,playAble,numberOfNFT
+    ],ind,[description,image,name],
     
     {gasLimit:3000000}
         )
@@ -286,8 +286,8 @@ const Lock3 = async ()=>{
           ,    [
             categoriesOptions.indexOf(categories),
            
-            trvOff,playAble
-          ],  ind,description,
+            trvOff,playAble,numberOfNFT
+          ],  ind,[description,image,name],
       
       {gasLimit:3000000}
           )

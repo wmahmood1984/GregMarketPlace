@@ -829,6 +829,24 @@ export const MarketAbi = [
 	{
 		"inputs": [
 			{
+				"internalType": "uint256",
+				"name": "_amount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_ind",
+				"type": "uint256"
+			}
+		],
+		"name": "changeprice",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "address",
 				"name": "_erc721",
 				"type": "address"
@@ -901,9 +919,9 @@ export const MarketAbi = [
 				"type": "string"
 			},
 			{
-				"internalType": "string",
+				"internalType": "string[]",
 				"name": "_desc",
-				"type": "string"
+				"type": "string[]"
 			}
 		],
 		"name": "createAuction",
@@ -944,12 +962,55 @@ export const MarketAbi = [
 				"type": "string"
 			},
 			{
-				"internalType": "string",
+				"internalType": "string[]",
 				"name": "_desc",
-				"type": "string"
+				"type": "string[]"
 			}
 		],
 		"name": "createAuction115",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256[]",
+				"name": "tokenId",
+				"type": "uint256[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "_closingTime",
+				"type": "uint256[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "_reservePrice",
+				"type": "uint256[]"
+			},
+			{
+				"internalType": "address[]",
+				"name": "_erc721",
+				"type": "address[]"
+			},
+			{
+				"internalType": "uint256[][]",
+				"name": "_categories",
+				"type": "uint256[][]"
+			},
+			{
+				"internalType": "string[]",
+				"name": "_album",
+				"type": "string[]"
+			},
+			{
+				"internalType": "string[][]",
+				"name": "_desc",
+				"type": "string[][]"
+			}
+		],
+		"name": "createAuctionBulk",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -982,9 +1043,9 @@ export const MarketAbi = [
 				"type": "string"
 			},
 			{
-				"internalType": "string",
+				"internalType": "string[]",
 				"name": "_desc",
-				"type": "string"
+				"type": "string[]"
 			}
 		],
 		"name": "createSale",
@@ -1020,9 +1081,9 @@ export const MarketAbi = [
 				"type": "string"
 			},
 			{
-				"internalType": "string",
+				"internalType": "string[]",
 				"name": "_desc",
-				"type": "string"
+				"type": "string[]"
 			}
 		],
 		"name": "createSale1155",
@@ -1107,9 +1168,9 @@ export const MarketAbi = [
 						"type": "uint256[]"
 					},
 					{
-						"internalType": "string[2]",
+						"internalType": "string[]",
 						"name": "uri",
-						"type": "string[2]"
+						"type": "string[]"
 					},
 					{
 						"internalType": "string",
@@ -1642,6 +1703,8 @@ export const IERC20 = [
 		"type": "function"
 	}
 ]
+
+
 
 export const Cdata = [
 	{
@@ -4126,12 +4189,318 @@ export const combinedCountries = [
 ]
 
 
-export const MarketAdd = "0x20Ecd87E5577A5A581ed452cD2DB1b8DbBf6C202"
+export const MarketAdd = "0xA14228D24bd7B45977D6bB0A9Fb3ff082d14febD"
 
+export const TVL = "0xE99BB31d0782f7Da05366EA5D683e781213c4AFC"
+
+export const TVLSwap = "0x7FC4c4e0bc57a2CA1C3Fe3736d1cdfd2aF8457f2"
+
+
+export const SwapAbi = [
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "previousOwner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferred",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "buyTVL",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "renounceOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "sellTVL",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint8",
+				"name": "markt",
+				"type": "uint8"
+			},
+			{
+				"internalType": "uint8",
+				"name": "trsry",
+				"type": "uint8"
+			}
+		],
+		"name": "setBuyFees",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "markt",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "tresry",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "liq",
+				"type": "address"
+			}
+		],
+		"name": "setFeeWallets",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "min",
+				"type": "uint256"
+			}
+		],
+		"name": "setMinVal",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint8",
+				"name": "markt",
+				"type": "uint8"
+			},
+			{
+				"internalType": "uint8",
+				"name": "trsry",
+				"type": "uint8"
+			}
+		],
+		"name": "setSellFees",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "getBUSDOutputamount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "output",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "getTVLOutputAmount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "output",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "liquidityWallet",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "marketingFeeBuy",
+		"outputs": [
+			{
+				"internalType": "uint8",
+				"name": "",
+				"type": "uint8"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "marketingFeeSell",
+		"outputs": [
+			{
+				"internalType": "uint8",
+				"name": "",
+				"type": "uint8"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "marketingWallet",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "minValue",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "treasuryFeeBuy",
+		"outputs": [
+			{
+				"internalType": "uint8",
+				"name": "",
+				"type": "uint8"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "treasuryFeeSell",
+		"outputs": [
+			{
+				"internalType": "uint8",
+				"name": "",
+				"type": "uint8"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "treasuryWallet",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
 
 const dummyERC721 = "0xf4C91AB5B5c40ba93540c0703954fC148C49f293"
 
-export const ERC20 = "0x2fC5021C7745C38d7Bf783ED3b1961bA150fae36"
+export const ERC20 = "0x2fC5021C7745C38d7Bf783ED3b1961bA150fae36"//"0xd5081dd24A339C927fFE98f7758ca723542ac988"
+
+export const BUSD = "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee"
 
 
 export const ERC1155Abi = [

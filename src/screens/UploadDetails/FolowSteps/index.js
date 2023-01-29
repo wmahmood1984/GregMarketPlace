@@ -115,12 +115,12 @@ const FolowSteps2 = ({ className ,upLoadNFT,approval,approvalLoader,mintingDone,
           
         </div>
       </div>
-      <div className={styles.note}>
+      {/* <div className={styles.note}>
         Something went wrong, please{" "}
         <a href="/#" target="_blank" rel="noopener noreferrer">
           try again
         </a>
-      </div>
+      </div> */}
     </div>
   );
 };

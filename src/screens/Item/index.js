@@ -9,10 +9,11 @@ import { useWeb3React } from "@web3-react/core";
 import { ERC20, IERC20, MarketAbi, MarketAdd } from "../../config";
 import { Contract, providers, utils } from "ethers";
 import axios from "axios";
-import { formatEther, formatUnits } from "ethers/lib/utils";
+import { formatEther, formatUnits, parseEther } from "ethers/lib/utils";
 import { useSelector } from "react-redux";
 import { client, q } from "../../config.js";
 import { style } from "@mui/system";
+import { toChecksumAddress } from "ethereum-checksum-address";
 const navLinks = ["Info", "Owners", "History", "Bids"];
 
 // const categories = [
@@ -116,8 +117,8 @@ const Item = () => {
 
 
 //   console.log("index",data)
-// console.log("auctions",auctions)
-// console.log("data",data)
+ console.log("auctions",account == toChecksumAddress(data.owner_of) ,toChecksumAddress(account,data.owner_of))
+ data && console.log("data",data)
 
 const reduxData = useSelector((state) => {
 
@@ -171,6 +172,28 @@ const getName = (add)=>{
     
     try {
       const tx = await marketContract.auctionCancel(utils.formatUnits(auctions.tokenId,0),auctions.tokenAdd,
+      {gasLimit:3000000})
+      await tx.wait()
+
+      if(tx){
+        console.log(tx)
+        setcancelDone(false)
+        setToggle(!toggle)
+      }
+
+
+    } catch (error) {
+      console.log(error)
+      setcancelDone(false)
+    }
+  }
+
+
+  const changePrice = async (amount)=>{
+    setcancelDone(true)
+    
+    try {
+      const tx = await marketContract.changeprice(parseEther(amount) ,utils.formatUnits(auctions.tokenId,0),
       {gasLimit:3000000})
       await tx.wait()
 
@@ -278,29 +301,41 @@ const getName = (add)=>{
                   </div>
                 ))} */}
               </div>
-              <img
-                srcSet={data && data.normalized_metadata.image}
-                src={data && data.normalized_metadata.image}
-                alt="Item"
-              />
+              {data && auctions && Number(auctions.category_album_collectible[2])!=0?
+      <video 
+      src={data && `${data.normalized_metadata.image}?stream=true`}
+      controls
+      alt="video preview"
+      />
+          : 
+         <img
+        srcSet={data && `${data.normalized_metadata.image}`}
+        src={data && `${data.normalized_metadata.image}`}
+        alt="image preview"
+      /> 
+ 
+        }
             </div>
-            <Options className={styles.options} />
+            {toChecksumAddress(account)  == toChecksumAddress(data.owner_of) ?
+            <Options changePrice={changePrice} cancelAuction={cancelAuction} className={styles.options} /> : null
+            }
+
           </div>
           <div className={styles.details}>
             <h1 className={cn("h3", styles.title)}>{data && data.normalized_metadata.name}</h1>
             <div className={styles.cost}>
               <div className={cn("status-stroke-green", styles.price)}>
-                {auctions && utils.formatEther(auctions.reserve) } TVL
+                {auctions && Number(utils.formatEther(auctions.reserve)).toFixed(0) } TVL
               </div>
               <div className={cn("status-stroke-black", styles.price)}>
-                ${auctions && utils.formatEther(auctions.reserve)}
+                ${auctions && Number(utils.formatEther(auctions.reserve)).toFixed(0)}
               </div>
               <div className={styles.counter}>{data && data.amount} in stock</div>
             </div>
             <div className={styles.info}>
               {/* This NFT Card will give you Access to Special Airdrops. To learn
               more about UI8 please visit{" "} */}
-              {auctions && auctions.uri[1]}
+              {auctions && auctions.image}
               {/* <a
                 href="https://ui8.net"
                 target="_blank"

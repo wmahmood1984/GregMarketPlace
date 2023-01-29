@@ -16,6 +16,7 @@ const Dropdown = ({ className, value, setValue, options,setInd }) => {
   return (
     <OutsideClickHandler onOutsideClick={() => setVisible(false)}>
       <div
+        
         className={cn(styles.dropdown, className, { [styles.active]: visible })}
       >
         <div className={styles.head} onClick={() => setVisible(!visible)}>
@@ -24,7 +25,7 @@ const Dropdown = ({ className, value, setValue, options,setInd }) => {
             <Icon name="arrow-bottom" size="10" />
           </div>
         </div>
-        <div className={styles.body}>
+        <div style={{overflow:"auto",maxHeight:"350px"}} className={styles.body}>
           {options.map((x, index) => (
             <div
               className={cn(styles.option, {

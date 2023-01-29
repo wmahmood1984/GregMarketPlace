@@ -1,0 +1,31 @@
+CreateIndex({
+  name: "Address4",
+  source: Collection("TravelCoin"),
+  values: [
+    { field: ["data", "name"] },
+    { field: ["data", "email"] },
+    { field: ["data", "account"] },
+    { field: ["data", "image"] },
+    { field: ["ts"] }
+  ]
+})
+
+
+createIndex with parameters
+
+CreateIndex({
+  name: "Address6",
+  source: Collection("TravelCoin"),
+  terms: [{ field: ["data", "account"] }],
+  values: [
+    { field: ["data", "name"] },
+    { field: ["data", "email"] },
+    { field: ["data", "account"] },
+    { field: ["data", "image"] },
+    { field: ["data", "bio"] },
+    { field: ["data", "twitter"] },
+    { field: ["ref"] }
+  ]
+})
+
+

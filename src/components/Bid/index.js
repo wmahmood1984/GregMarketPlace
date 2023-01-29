@@ -53,7 +53,7 @@ const Bid = ({ className,tokenId,AddressOfToken,setVisibleModalBid,toggle,setTog
     abc()
   }, [])
 
-//  console.log("allowance in " ,allowance,bid )
+ // console.log("allowance in " ,allowance,bid )
 
 
   

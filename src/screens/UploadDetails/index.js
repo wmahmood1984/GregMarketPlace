@@ -14,7 +14,7 @@ import { Contract, utils } from "ethers";
 import { Cdata, ERC20, IERC20, MarketAbi, MarketAdd, TokenAbi, TokenAdd } from "../../config";
 import { useWeb3React } from "@web3-react/core";
 import { useDispatch } from "react-redux";
-import { getData } from "../../state/ui";
+import { dataBase, getData } from "../../state/ui";
 import { formatUnits } from "ethers/lib/utils";
 
 
@@ -104,11 +104,13 @@ const subConArray = Cdata[continentInd].subMenu!=null ? Cdata[continentInd].subM
 const countryArray = Cdata[continentInd].subMenu ? Cdata[continentInd].subMenu[subConInd].subMenu?.map((v,e)=>v.title) : []
 
 
+
+
 function indexGenerator(a,b,c){
   const x = a<10? `0${a}` : a
   const y = b+1<10? `0${b+1}` : b
   const z = c+1<10? `0${c+1}` : c
-  console.log("index",x+y+z)
+//  console.log("index",x+y+z)
   return x+y+z
 }
 
@@ -156,9 +158,10 @@ const captureFile = async(e)=>{
    reader.readAsArrayBuffer(file)
    reader.onloadend = async ()=>{
     imageBugger = Buffer(reader.result)
-     console.log("buffer",imageBugger)
+//     console.log("buffer",imageBugger)
  client.add(imageBugger).then((res) => {
    setimage(`https://gateway.pinata.cloud/ipfs/${res.path}`)
+//   console.log("Hash",res.path)
 
 });}
 }
@@ -170,21 +173,28 @@ const captureFile = async(e)=>{
 
 const upLoadNFT = async ()=>{
   setMintingLoader(true)
- 
+ try {
   const obj = {image:image,name,description,PriceinEth,royalties,size,sale,price,travelOffer,album:items[album].title,minter_address:account}
- // console.log("obe",obj)
-  const jsonObj = JSON.stringify(obj)
-  const jsonIPFS = await client.add(jsonObj)
-  const tx = await tokenContract.Mint(account,jsonIPFS.path,
+  // console.log("obe",obj)
+   const jsonObj = JSON.stringify(obj)
+   const jsonIPFS = await client.add(jsonObj)
+  // console.log("PlayAble being uploaded",play)
+   const tx = await tokenContract.Mint(account,jsonIPFS.path,
+ 
+     {gasLimit:3000000})
+   await tx.wait()
+ 
+   if(tx){
+ //    console.log("obj",jsonIPFS)
+     setMintingdone(true)
+     setMintingLoader(false)
+   }
+  
+ } catch (error) {
+  console.log("error in Uplading NFT",error)
+  setMintingLoader(false)
+ }
 
-    {gasLimit:3000000})
-  await tx.wait()
-
-  if(tx){
-    console.log("obj",jsonIPFS)
-    setMintingdone(true)
-    setMintingLoader(false)
-  }
 }
 
 
@@ -203,7 +213,7 @@ const approval = async ()=>{
   setApprovalLoader(true)
 
   const count = Counter && Counter
-  console.log("Counter",count)
+ // console.log("Counter",count)
   try {
     const tx = await tokenContract.approve(MarketAdd,count)
     await tx.wait()
@@ -215,6 +225,8 @@ const approval = async ()=>{
     }
   } catch (error) {
     console.log(error)
+    setApprovalLoader(false)
+    setApprovalDone(true)
   }
 }
 
@@ -226,7 +238,7 @@ const TVLapproval = async ()=>{
     await tx.wait()
     
     if(tx){
-      console.log("tx",tx)
+   //   console.log("tx",tx)
       setApprovalLoader(false)
       setApprovalDone(true)
     }
@@ -241,17 +253,18 @@ const Lock2 = async ()=>{
 setLockLoader(true)
   try {
     const ind = indexGenerator(continentInd,subConInd,countryInd)
-    console.log("first",ind)
+ //   console.log("first",ind)
     const trvOff = travelOffer ? 1 : 0
     const playAble = play ? 1 : 0
-    
+ //   console.log("PlayAble being uploaded",playAble)
+
     const tx = await marketContract.createAuction(
         Counter,Date.parse(AuctionEnd)/1000,utils.parseUnits(PriceinEth.toString(),"ether") ,TokenAdd
     ,    [
       categoriesOptions.indexOf(categories),
        
-      trvOff,playAble
-    ],ind,description,
+      trvOff,playAble,1
+    ],ind,[description,image,name],
     
     {gasLimit:3000000}
         )
@@ -262,10 +275,14 @@ setLockLoader(true)
       setLockdone(true)
       setLockLoader(false)
       setVisibleModal(false)
+      dispatch(dataBase({}) )
       dispatch(getData({}))
     }
   } catch (error) {
     console.log(error)
+    setLockdone(true)
+    setLockLoader(false)
+    setVisibleModal(false)
   }
 }
 
@@ -278,23 +295,25 @@ const Lock3 = async ()=>{
       const ind = indexGenerator(continentInd,subConInd,countryInd)
       const trvOff = travelOffer ? 1 : 0
       const playAble = play? 1: 0
+   //   console.log("PlayAble being uploaded",playAble)
       const tx = await marketContract.createSale(
           Counter,utils.parseUnits(PriceinEth.toString(),"ether") ,TokenAdd
           ,    [
             categoriesOptions.indexOf(categories),
            
-            trvOff,playAble
-          ],  ind,description,
+            trvOff,playAble,1
+          ],  ind,[description,image,name],
       
       {gasLimit:3000000}
           )
       await tx.wait()
       
       if(tx){
-        console.log("tx",tx)
+ //       console.log("tx",tx)
         setLockdone(true)
         setLockLoader(false)
         setVisibleModal(false)
+        dispatch(dataBase({}) )
         dispatch(getData({}))
       }
     } catch (error) {

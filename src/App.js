@@ -23,6 +23,7 @@ import ContactUs from "./screens/ContactUs";
 import AboutUs from "./screens/AboutUs";
 import Auction from "./screens/Search03";
 import Upload2 from "./screens/UploadDetails/upload2";
+import Search04 from "./screens/Home/Search04";
 
 function App() {
   return (
@@ -38,6 +39,14 @@ function App() {
         <Route exact path="/upload-variants" render={() => (
           <Page>
             <UploadVariants />
+          </Page>
+        )}
+        />
+
+
+        <Route exact path="/swap" render={() => (
+          <Page>
+            <Search04 />
           </Page>
         )}
         />

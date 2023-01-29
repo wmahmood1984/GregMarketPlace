@@ -206,7 +206,7 @@ const Approval = async (id,add)=>{
               options={dateOptions}
             />
           </div>
-          <div className={styles.dropdown}>
+          {/* <div className={styles.dropdown}>
             <Dropdown
               className={styles.dropdown}
               value={category}
@@ -214,7 +214,7 @@ const Approval = async (id,add)=>{
               options={navLinks}
               setInd={()=>{}}
             />
-          </div>
+          </div> */}
           {/* <div className={styles.nav}>
             {navLinks.map((x, index) => (
               <button
@@ -230,7 +230,7 @@ const Approval = async (id,add)=>{
           </div> */}
         </div>
         <div className={styles.row}>
-          <div className={styles.filters}>
+          {/* <div className={styles.filters}>
             <div className={styles.range}>
               <div className={styles.label}>Price range</div>
               <Range
@@ -341,7 +341,7 @@ const Approval = async (id,add)=>{
               <Icon name="close-circle-fill" size="24" />
               <span>Reset filter</span>
             </div>
-          </div>
+          </div> */}
           <div className={styles.wrapper}>
             <div className={styles.list}>
               {bids && bids.map((x, index) => (

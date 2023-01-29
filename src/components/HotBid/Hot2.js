@@ -61,23 +61,23 @@ const Hot2 = ({ classSection, title,code }) => {
   // });
 
   const bids2 = useSelector((state) => {
-    return state.adoptReducer.bids;
+    return state.adoptReducer.moralisData;
   });
 
-const bids3 = bids2 && bids2.filter(item=>item.title!=`Server error`)  
+//const bids3 = bids2 && bids2.filter(item=>item.title!=`Server error`)  
 
-const bids4 = bids2 &&  [...bids3]
+const bids4 = bids2 &&  [...bids2]
 
 const refindArray = bids2 && bids4.sort((a, b) => a.highestBidder.length - b.highestBidder.length );
 
-const bids5 = bids3 && refindArray.reverse()
+const bids5 = bids2 && refindArray.reverse()
 
 const bids6 = bids2 && bids5.filter(item=> item.album.slice(0,2)===code)
 
-const bids = bids2 && travelOffer?  bids6.filter(item=>item.category_album_collectible[1]==1) : bids6.filter(item=>item.category_album_collectible[1]==0)
+const bids = bids2 && travelOffer?  bids6.filter(item=>item.category_album_collectible[1]==1) : bids6.filter(item=>item.category_album_collectible[1]==0  )
 
 
-// console.log("refine in hot",bids2[0].category_album_collectible[1])
+ console.log("refine in hot",bids)
 
 
 

@@ -1,7 +1,7 @@
 @import ../../../styles/helpers
 
 .section
-    overflow: hidden
+    overflow: visible
 
 .container
     display: flex
@@ -132,12 +132,19 @@
     color: $neutrals4
 
 .price
-    display: inline-block
-    padding: 7px
-    box-shadow: inset 0 0 0 2px $green
+    flex-shrink: 0
+    margin-left: 8px
+    padding: 0 8px
     border-radius: 4px
-    +hairline-2
+    box-shadow: inset 0 0 0 2px $green
+    font-size: 12px
+    line-height: 26px
+    font-weight: 700
+    text-transform: uppercase
     color: $green
+    & > span
+        +dark
+        color: $neutrals4
 
 .item
     display: flex
